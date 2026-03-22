@@ -89,8 +89,8 @@
     .sr input{flex:1;border:.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:9px 14px;font-size:16px;background:var(--color-background-primary);color:var(--color-text-primary);min-width:0}
     .sr input:focus{outline:none;border-color:#10B981}
     .sr button{padding:9px 18px;border-radius:var(--border-radius-md);background:#10B981;color:#fff;border:none;font-size:16px;font-weight:500;cursor:pointer;white-space:nowrap}
-    .tw{background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:1rem}
-    table{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed}
+    .tw{background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow-x:auto;overflow-y:hidden;margin-bottom:1rem;-webkit-overflow-scrolling:touch}
+    table{width:100%;min-width:480px;border-collapse:collapse;font-size:14px;table-layout:fixed}
     th{padding:8px 10px;text-align:left;font-size:13px;font-weight:400;color:var(--color-text-secondary);border-bottom:.5px solid var(--color-border-tertiary);white-space:nowrap;cursor:pointer;user-select:none}
     th:hover{color:var(--color-text-primary)}
     th.sorted{color:#10B981}
@@ -101,7 +101,7 @@
     .us-nm{font-size:11px;color:var(--color-text-secondary);margin-top:1px;overflow:hidden;text-overflow:ellipsis}
     .kr-nm{font-weight:500;font-size:15px;color:var(--color-text-primary);line-height:1.25}
     .kr-cd{font-size:10px;color:var(--color-text-tertiary);margin-top:1px;font-variant-numeric:tabular-nums}
-    .bdg{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:13px;font-weight:500;white-space:nowrap}
+    .bdg{display:inline-flex;align-items:center;padding:4px 10px;border-radius:6px;font-size:13px;font-weight:600;white-space:nowrap;letter-spacing:-.2px}
     .b5{background:#059669;color:#ffffff}.b4{background:#16a34a;color:#ffffff}.b3{background:#d97706;color:#ffffff}
     .b2{background:#ea580c;color:#ffffff}.b1{background:#dc2626;color:#ffffff}.b0{background:#991b1b;color:#ffffff}
     .gpos{color:#10B981;font-weight:500}.gneg{color:#F87171;font-weight:500}.gwarn{color:#d97706;font-weight:500}
@@ -298,11 +298,11 @@
     </div>
     <div class="tw"><table>
       <thead><tr>
-        <th style="width:30%" onclick="thSort('name')">종목 <span id="arr-name"></span></th>
-        <th style="width:15%" onclick="thSort('price')">현재가 <span id="arr-price"></span></th>
-        <th style="width:12%" class="hide-mobile" onclick="thSort('ma10')">MA10 <span id="arr-ma10"></span></th>
-        <th style="width:11%" onclick="thSort('gap')">이격률 <span id="arr-gap">▼</span></th>
-        <th style="width:24%">신호 등급</th>
+        <th style="width:28%" onclick="thSort('name')">종목 <span id="arr-name"></span></th>
+        <th style="width:16%" onclick="thSort('price')">현재가 <span id="arr-price"></span></th>
+        <th style="width:13%" class="hide-mobile" onclick="thSort('ma10')">MA10 <span id="arr-ma10"></span></th>
+        <th style="width:13%" onclick="thSort('gap')">이격률 <span id="arr-gap">▼</span></th>
+        <th style="width:20%">신호 등급</th>
         <th style="width:8%" class="hide-mobile">섹터</th>
         <th style="width:5%;text-align:center">★</th>
       </tr></thead>
@@ -389,12 +389,12 @@
         <table class="gt">
           <thead><tr><th>등급</th><th>이격률</th><th class="hide-mobile">신규 매수</th><th>기존 보유</th></tr></thead>
           <tbody>
-            <tr><td><span class="bdg b5">★★★★★ 적극 매수</span></td><td style="color:#10B981;font-weight:500">0~+15%</td><td class="hide-mobile">50~100% 진입</td><td>추가 매수</td></tr>
-            <tr><td><span class="bdg b4">★★★★ 매수</span></td><td style="color:#3B6D11;font-weight:500">+15~+30%</td><td class="hide-mobile">30~50% 분할</td><td>보유 유지</td></tr>
-            <tr><td><span class="bdg b3">★★★ 보유/관망</span></td><td style="color:#FBBF24;font-weight:500">+30% 초과</td><td class="hide-mobile">진입 자제</td><td>차익 고려</td></tr>
-            <tr><td><span class="bdg b2">★★ 주의/관망</span></td><td style="color:#993C1D;font-weight:500">-5~0%</td><td class="hide-mobile">이탈 확인</td><td>손절 점검</td></tr>
-            <tr><td><span class="bdg b1">★ 매도</span></td><td style="color:#F87171;font-weight:500">-5~-20%</td><td class="hide-mobile">진입 금지</td><td>분할 매도</td></tr>
-            <tr><td><span class="bdg b0">☆ 강력 매도</span></td><td style="color:#F87171;font-weight:500">-20% 초과</td><td class="hide-mobile">진입 금지</td><td>즉시 손절</td></tr>
+            <tr><td><span class="bdg b5">적극 매수</span></td><td style="color:#10B981;font-weight:500">0~+15%</td><td class="hide-mobile">50~100% 진입</td><td>추가 매수</td></tr>
+            <tr><td><span class="bdg b4">매수</span></td><td style="color:#3B6D11;font-weight:500">+15~+30%</td><td class="hide-mobile">30~50% 분할</td><td>보유 유지</td></tr>
+            <tr><td><span class="bdg b3">보유/관망</span></td><td style="color:#FBBF24;font-weight:500">+30% 초과</td><td class="hide-mobile">진입 자제</td><td>차익 고려</td></tr>
+            <tr><td><span class="bdg b2">주의/관망</span></td><td style="color:#993C1D;font-weight:500">-5~0%</td><td class="hide-mobile">이탈 확인</td><td>손절 점검</td></tr>
+            <tr><td><span class="bdg b1">매도</span></td><td style="color:#F87171;font-weight:500">-5~-20%</td><td class="hide-mobile">진입 금지</td><td>분할 매도</td></tr>
+            <tr><td><span class="bdg b0">강력 매도</span></td><td style="color:#F87171;font-weight:500">-20% 초과</td><td class="hide-mobile">진입 금지</td><td>즉시 손절</td></tr>
           </tbody>
         </table>
       </div>
@@ -609,12 +609,12 @@ function showLoadingOverlay(show) {
 
 
 const GRADES=[
-  {key:5,label:'★★★★★ 적극 매수',cls:'b5',short:'적극매수',desc:'월봉 MA10 직상단 구간으로 손절 기준이 명확하며 리스크 대비 수익 구조가 가장 유리합니다.',newBuy:'50~100% 진입',hold:'추가 매수 고려'},
-  {key:4,label:'★★★★ 매수',cls:'b4',short:'매수',desc:'추세는 강하나 이평선까지 낙폭이 있으므로 분할 진입을 권장합니다.',newBuy:'30~50% 분할 진입',hold:'보유 유지'},
-  {key:3,label:'★★★ 보유/관망',cls:'b3',short:'보유/관망',desc:'월봉 기준 조정 확률이 높아지는 과열 구간입니다.',newBuy:'신규 진입 자제',hold:'차익실현 고려'},
-  {key:2,label:'★★ 주의/관망',cls:'b2',short:'주의/관망',desc:'MA10 직하단 5% 이내 회색지대입니다. 이탈 여부 확인 후 판단하세요.',newBuy:'진입 대기',hold:'손절선 재점검'},
-  {key:1,label:'★ 매도',cls:'b1',short:'매도',desc:'이평선이 저항선으로 전환된 명확한 하락 추세 구간입니다.',newBuy:'진입 금지',hold:'분할 매도'},
-  {key:0,label:'☆ 강력 매도',cls:'b0',short:'강력매도',desc:'급락 구간으로 추가 하락 위험이 높습니다.',newBuy:'진입 금지',hold:'즉시 손절'},
+  {key:5,label:'적극 매수',cls:'b5',short:'적극매수',desc:'월봉 MA10 직상단 구간으로 손절 기준이 명확하며 리스크 대비 수익 구조가 가장 유리합니다.',newBuy:'50~100% 진입',hold:'추가 매수 고려'},
+  {key:4,label:'매수',cls:'b4',short:'매수',desc:'추세는 강하나 이평선까지 낙폭이 있으므로 분할 진입을 권장합니다.',newBuy:'30~50% 분할 진입',hold:'보유 유지'},
+  {key:3,label:'보유/관망',cls:'b3',short:'보유/관망',desc:'월봉 기준 조정 확률이 높아지는 과열 구간입니다.',newBuy:'신규 진입 자제',hold:'차익실현 고려'},
+  {key:2,label:'주의/관망',cls:'b2',short:'주의/관망',desc:'MA10 직하단 5% 이내 회색지대입니다. 이탈 여부 확인 후 판단하세요.',newBuy:'진입 대기',hold:'손절선 재점검'},
+  {key:1,label:'매도',cls:'b1',short:'매도',desc:'이평선이 저항선으로 전환된 명확한 하락 추세 구간입니다.',newBuy:'진입 금지',hold:'분할 매도'},
+  {key:0,label:'강력 매도',cls:'b0',short:'강력매도',desc:'급락 구간으로 추가 하락 위험이 높습니다.',newBuy:'진입 금지',hold:'즉시 손절'},
 ];
 
 let S={page:'stocks',mkt:'us',filter:null,sortKey:'gap',sortDir:'desc',thKey:null,thDir:'desc',
@@ -855,7 +855,7 @@ function renderStocks(){
   const lbls=['적극매수','매수','보유/관망','주의/관망','매도','강력매도'];
   const cls=['cvg','cvg','cva','cva','cvr','cvr'];
   document.getElementById('dash-stats').innerHTML=lbls.map((l,i)=>`<div class="sc"><div class="sc-l">${l}</div><div class="sc-v ${cls[i]}">${cnts[i]}</div></div>`).join('');
-  const gpm=[['★★★★★ 적극 매수','gp5'],['★★★★ 매수','gp4'],['★★★ 보유/관망','gp3'],['★★ 주의/관망','gp2'],['★ 매도','gp1'],['☆ 강력 매도','gp0']];
+  const gpm=[['적극 매수','gp5'],['매수','gp4'],['보유/관망','gp3'],['주의/관망','gp2'],['매도','gp1'],['강력 매도','gp0']];
   document.getElementById('grade-filter').innerHTML='<span style="font-size:14px;color:var(--color-text-secondary);margin-right:2px">등급:</span>'+
     gpm.map((g,i)=>`<span class="pill ${g[1]}${S.filter===i?' on':''}" onclick="setFilter(${i})">${g[0]} (${cnts[i]})</span>`).join('');
   renderStocksTable();
@@ -888,9 +888,9 @@ function renderStocksTable(){
     const g=getGrade(s.gap);
     return`<tr class="cl" onclick="openDetail('${s.t}','${S.mkt}')">
       <td>${stockCell(s,isKr)}</td>
-      <td style="font-size:clamp(13px,1.8vw,16px);font-weight:500;white-space:nowrap">${fp(s.p,isKr)}</td>
-      <td class="hide-mobile" style="font-size:clamp(13px,1.8vw,16px);color:var(--color-text-secondary)">${fp(s.m,isKr)}</td>
-      <td class="${gc(s.gap)}" style="font-size:clamp(13px,1.8vw,16px);white-space:nowrap">${fg(s.gap)}</td>
+      <td style="font-size:14px;font-weight:500;white-space:nowrap">${fp(s.p,isKr)}</td>
+      <td class="hide-mobile" style="font-size:14px;color:var(--color-text-secondary);white-space:nowrap">${fp(s.m,isKr)}</td>
+      <td class="${gc(s.gap)}" style="font-size:14px;font-weight:500;white-space:nowrap">${fg(s.gap)}</td>
       <td><span class="bdg ${g.cls}">${g.label}</span></td>
       <td class="hide-mobile"><span style="font-size:13px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:2px 7px;border-radius:var(--border-radius-md)">${s.sec}</span></td>
       <td style="text-align:center">${favBtnHTML(s.t)}</td>
