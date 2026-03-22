@@ -728,38 +728,164 @@ def run_us():
     tickers = [t[0] for t in SP500]
     meta = {t[0]: {"name":t[1],"sector":t[2],"cap_usd":0,"cap_label":"-"} for t in SP500}
 
-    # 시가총액 별도 수집 (fast_info 사용)
-    print("  📊 시가총액 수집 중...")
-    for ticker, m in meta.items():
+    # ── 시가총액: 배치 다운로드로 한번에 수집 ──
+    print("  📊 시가총액 배치 수집 중...")
+    cap_batch_size = 50
+    for i in range(0, len(tickers), cap_batch_size):
+        batch = tickers[i:i+cap_batch_size]
         try:
-            fi = yf.Ticker(ticker).fast_info
-            cap = getattr(fi, 'market_cap', 0) or 0
-            m["cap_usd"] = cap
-            m["cap_label"] = fmt_cap(cap, "us")
+            # 1일 데이터로 빠르게 시가총액 수집
+            data = yf.download(
+                " ".join(batch), period="1d", interval="1d",
+                group_by="ticker", auto_adjust=True,
+                progress=False, threads=True
+            )
+            for ticker in batch:
+                try:
+                    info = yf.Ticker(ticker).fast_info
+                    cap = getattr(info, "market_cap", 0) or 0
+                    if cap > 0:
+                        meta[ticker]["cap_usd"] = cap
+                        meta[ticker]["cap_label"] = fmt_cap(cap, "us")
+                except: pass
         except: pass
+        time.sleep(0.5)
 
+    # ── 시가총액 미수집 종목 재시도 (개별 호출) ──
+    missing_cap = [t for t, m in meta.items() if m["cap_usd"] == 0]
+    if missing_cap:
+        print(f"  🔄 시가총액 재시도: {len(missing_cap)}개")
+        for ticker in missing_cap:
+            for attempt in range(1):
+                try:
+                    info = yf.Ticker(ticker).info
+                    cap = info.get("marketCap", 0) or info.get("market_cap", 0) or 0
+                    if cap > 0:
+                        meta[ticker]["cap_usd"] = cap
+                        meta[ticker]["cap_label"] = fmt_cap(cap, "us")
+                        break
+                except: pass
+                time.sleep(1)
+
+    cap_filled = sum(1 for m in meta.values() if m["cap_usd"] > 0)
+    print(f"  ✅ 시가총액 수집: {cap_filled}/{len(tickers)}개")
+
+    # ── 월봉 MA10 배치 계산 ──
     batch_size = 25
     total_success = 0
+    failed_tickers = []
     for i in range(0, len(tickers), batch_size):
         batch = tickers[i:i+batch_size]
-        total_success += process_batch(batch, meta, "us", i//batch_size+1, len(tickers)//batch_size+1)
+        ok = process_batch(batch, meta, "us", i//batch_size+1, len(tickers)//batch_size+1)
+        total_success += ok
+        if ok < len(batch):
+            failed_tickers.extend([t for t in batch])
         time.sleep(1)
-    print(f"  ✅ 미국: {total_success}/{len(tickers)} 완료")
+
+    # ── 실패 종목 개별 재시도 ──
+    if failed_tickers:
+        print(f"  🔄 MA10 재시도: {len(failed_tickers)}개")
+        retry_success = 0
+        for ticker in failed_tickers:
+            try:
+                hist = yf.Ticker(ticker).history(period="2y", interval="1mo")
+                close = hist["Close"].dropna()
+                if len(close) < 10: continue
+                ma10 = float(close.iloc[-10:].mean())
+                price = float(close.iloc[-1])
+                gap_pct = round((price - ma10) / ma10 * 100, 2)
+                m = meta[ticker]
+                upsert({
+                    "ticker": ticker, "name": m["name"],
+                    "market": "us", "sector": m["sector"],
+                    "price": round(price, 2), "ma10": round(ma10, 2),
+                    "gap_pct": gap_pct,
+                    "market_cap_usd": m["cap_usd"],
+                    "market_cap_label": m["cap_label"],
+                })
+                retry_success += 1
+                total_success += 1
+            except: pass
+            time.sleep(0.5)
+        print(f"  ✅ 재시도 성공: {retry_success}개")
+
+    print(f"  ✅ 미국 최종: {total_success}/{len(tickers)} 완료")
 
 # ── 한국 실행 ─────────────────────────────────────────────
 def run_kr():
     print("\n🇰🇷 한국 시총 상위 500 업데이트 시작")
     stocks = get_kr500()
+
+    # .KS(코스피) 먼저 시도, 실패 시 .KQ(코스닥) 재시도
     yf_tickers = [s["ticker"]+".KS" for s in stocks]
-    meta = {s["ticker"]+".KS": {"name":s["name"],"sector":s["sector"],"cap_usd":s["cap_usd"],"cap_label":s["cap_label"]} for s in stocks}
+    meta = {s["ticker"]+".KS": {"name":s["name"],"sector":s["sector"],
+            "cap_usd":s["cap_usd"],"cap_label":s["cap_label"],
+            "ticker_pure":s["ticker"]} for s in stocks}
 
     batch_size = 20
     total_success = 0
+    failed_tickers = []
+
     for i in range(0, len(yf_tickers), batch_size):
         batch = yf_tickers[i:i+batch_size]
-        total_success += process_batch(batch, meta, "kr", i//batch_size+1, len(yf_tickers)//batch_size+1)
+        ok = process_batch(batch, meta, "kr", i//batch_size+1, len(yf_tickers)//batch_size+1)
+        total_success += ok
+        # 실패한 종목 추적
+        if ok < len(batch):
+            failed_tickers.extend(batch)
         time.sleep(1)
-    print(f"  ✅ 한국: {total_success}/{len(stocks)} 완료")
+
+    # ── .KS 실패 → .KQ로 재시도 (코스닥 종목) ──
+    if failed_tickers:
+        print(f"  🔄 .KQ로 재시도: {len(failed_tickers)}개")
+        kq_meta = {}
+        kq_tickers = []
+        for ks_ticker in failed_tickers:
+            pure = ks_ticker.replace(".KS", "")
+            kq = pure + ".KQ"
+            kq_tickers.append(kq)
+            kq_meta[kq] = meta[ks_ticker]
+
+        retry_success = 0
+        for i in range(0, len(kq_tickers), batch_size):
+            batch = kq_tickers[i:i+batch_size]
+            ok = process_batch(batch, kq_meta, "kr", f"KQ-{i//batch_size+1}", len(kq_tickers)//batch_size+1)
+            retry_success += ok
+            total_success += ok
+            time.sleep(1)
+        print(f"  ✅ .KQ 재시도 성공: {retry_success}개")
+
+    # ── 그래도 실패한 종목 개별 재시도 ──
+    print(f"  🔄 개별 재시도 시작...")
+    individual_success = 0
+    all_stocks_dict = {s["ticker"]: s for s in stocks}
+
+    # Supabase에서 아직 업데이트 안 된 ticker 확인
+    for s in stocks:
+        ticker = s["ticker"]
+        for suffix in [".KS", ".KQ"]:
+            try:
+                hist = yf.Ticker(ticker+suffix).history(period="2y", interval="1mo")
+                close = hist["Close"].dropna()
+                if len(close) < 10: continue
+                ma10 = float(close.iloc[-10:].mean())
+                price = float(close.iloc[-1])
+                gap_pct = round((price - ma10) / ma10 * 100, 2)
+                upsert({
+                    "ticker": ticker, "name": s["name"],
+                    "market": "kr", "sector": s["sector"],
+                    "price": round(price, 0), "ma10": round(ma10, 0),
+                    "gap_pct": gap_pct,
+                    "market_cap_usd": s["cap_usd"],
+                    "market_cap_label": s["cap_label"],
+                })
+                individual_success += 1
+                total_success += 1
+                break
+            except: pass
+        time.sleep(0.3)
+
+    print(f"  ✅ 한국 최종: {total_success}/{len(stocks)} 완료")
 
 # ── 메인 ──────────────────────────────────────────────────
 if __name__ == "__main__":
