@@ -364,94 +364,102 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 /* ════════════════════════════════════════
-   ★ API LAYER — 실서비스 연동 시 이 섹션을 교체하세요
-   BASE_URL을 실제 서버 주소로 변경하고
-   아래 mock 함수들을 실제 fetch 호출로 교체합니다.
+   ★ SUPABASE API LAYER
+   아래 두 줄을 Supabase 프로젝트의 실제 값으로 교체하세요.
    ════════════════════════════════════════ */
-const BASE_URL = 'https://api.ma10signal.com'; // TODO: 실서버 URL로 교체
+const SUPABASE_URL = 'https://abcdefgh12345678.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+/* ════════════════════════════════════════ */
 
-const mockDB = {
-  users: [{ email:'demo@ma10.com', password:'demo1234', name:'데모 유저' }],
-  favs: {}
+/* Supabase 경량 클라이언트 (CDN SDK 불필요 — fetch 직접 호출) */
+const SB = {
+  headers: {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`
+  },
+  authHeaders() {
+    const token = localStorage.getItem('ma10_sb_token') || SUPABASE_KEY;
+    return { 'Content-Type':'application/json', 'apikey':SUPABASE_KEY, 'Authorization':`Bearer ${token}` };
+  }
 };
-let mockToken = null;
 
 async function apiSignup(email, password, name) {
-  await delay(600);
-  if (mockDB.users.find(u => u.email === email)) throw new Error('이미 사용 중인 이메일입니다.');
-  mockDB.users.push({ email, password, name });
-  mockDB.favs[email] = new Set();
-  return { ok: true };
-  /* TODO: 실서비스 코드로 교체
-  const res = await fetch(`${BASE_URL}/auth/signup`, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ email, password, name })
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+    method: 'POST', headers: SB.headers,
+    body: JSON.stringify({ email, password, data: { name } })
   });
-  if (!res.ok) throw new Error((await res.json()).message);
-  return res.json(); */
+  const data = await res.json();
+  if (!res.ok) {
+    if (data.msg && data.msg.includes('already')) throw new Error('이미 사용 중인 이메일입니다.');
+    throw new Error(data.msg || data.error_description || '가입에 실패했습니다.');
+  }
+  return { ok: true };
 }
 
 async function apiLogin(email, password) {
-  await delay(600);
-  const user = mockDB.users.find(u => u.email === email && u.password === password);
-  if (!user) throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
-  mockToken = `mock-token-${email}`;
-  if (!mockDB.favs[email]) mockDB.favs[email] = new Set();
-  return { token: mockToken, user: { email: user.email, name: user.name } };
-  /* TODO: 실서비스 코드로 교체
-  const res = await fetch(`${BASE_URL}/auth/login`, {
-    method:'POST', headers:{'Content-Type':'application/json'},
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    method: 'POST', headers: SB.headers,
     body: JSON.stringify({ email, password })
   });
-  if (!res.ok) throw new Error((await res.json()).message);
   const data = await res.json();
-  localStorage.setItem('ma10_token', data.token);
-  return data; */
+  if (!res.ok) throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
+  localStorage.setItem('ma10_sb_token', data.access_token);
+  localStorage.setItem('ma10_sb_refresh', data.refresh_token);
+  const name = data.user?.user_metadata?.name || email.split('@')[0];
+  return { token: data.access_token, user: { email, name } };
 }
 
 async function apiLogout() {
-  await delay(200);
-  mockToken = null;
-  /* TODO: 실서비스 코드로 교체
-  await fetch(`${BASE_URL}/auth/logout`, { method:'POST',
-    headers:{ Authorization: `Bearer ${localStorage.getItem('ma10_token')}` }
+  await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+    method: 'POST', headers: SB.authHeaders()
   });
-  localStorage.removeItem('ma10_token'); */
+  localStorage.removeItem('ma10_sb_token');
+  localStorage.removeItem('ma10_sb_refresh');
 }
 
-async function apiGetFavs(email) {
-  await delay(300);
-  return [...(mockDB.favs[email] || [])];
-  /* TODO: 실서비스 코드로 교체
-  const res = await fetch(`${BASE_URL}/favs`, {
-    headers:{ Authorization: `Bearer ${localStorage.getItem('ma10_token')}` }
+async function apiGetFavs() {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/favorites?select=ticker&order=created_at.asc`, {
+    headers: SB.authHeaders()
   });
-  return (await res.json()).tickers; */
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.map(d => d.ticker);
 }
 
 async function apiAddFav(email, ticker) {
-  await delay(200);
-  if (!mockDB.favs[email]) mockDB.favs[email] = new Set();
-  mockDB.favs[email].add(ticker);
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/favorites`, {
+    method: 'POST', headers: { ...SB.authHeaders(), 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ ticker })
+  });
+  if (!res.ok) throw new Error('즐겨찾기 추가 실패');
   return { ok: true };
-  /* TODO: 실서비스 코드로 교체
-  await fetch(`${BASE_URL}/favs/${ticker}`, { method:'POST',
-    headers:{ Authorization: `Bearer ${localStorage.getItem('ma10_token')}` }
-  }); */
 }
 
 async function apiRemoveFav(email, ticker) {
-  await delay(200);
-  mockDB.favs[email]?.delete(ticker);
+  await fetch(`${SUPABASE_URL}/rest/v1/favorites?ticker=eq.${encodeURIComponent(ticker)}`, {
+    method: 'DELETE', headers: SB.authHeaders()
+  });
   return { ok: true };
-  /* TODO: 실서비스 코드로 교체
-  await fetch(`${BASE_URL}/favs/${ticker}`, { method:'DELETE',
-    headers:{ Authorization: `Bearer ${localStorage.getItem('ma10_token')}` }
-  }); */
 }
 
-function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
-/* ════════════════════════════════════════ */
+/* 페이지 로드 시 기존 로그인 세션 복원 */
+async function restoreSession() {
+  const token = localStorage.getItem('ma10_sb_token');
+  if (!token) return;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) { localStorage.removeItem('ma10_sb_token'); return; }
+    const data = await res.json();
+    const name = data.user_metadata?.name || data.email.split('@')[0];
+    AUTH.user = { email: data.email, name };
+    const favList = await apiGetFavs();
+    AUTH.favs = new Set(favList);
+    renderAuthArea(); renderPNav();
+  } catch(e) { localStorage.removeItem('ma10_sb_token'); }
+}
 
 /* ── DATA (TODO: 실서비스에서 API로 교체) ── */
 const ALL={
@@ -628,7 +636,7 @@ async function doLogin(){
   try{
     const data=await apiLogin(email,pw);
     AUTH.user=data.user;
-    const favList=await apiGetFavs(email);
+    const favList=await apiGetFavs();
     AUTH.favs=new Set(favList);
     closeModal();renderAuthArea();renderPNav();
     showToast(`${AUTH.user.name}님, 환영합니다!`,'success');
@@ -1004,7 +1012,8 @@ function updateTimer(){
   document.getElementById('timer').textContent=(hh>0?hh+'시간 ':'')+mm+'분 '+String(ss).padStart(2,'0')+'초';
 }
 
-renderAuthArea();render();updateTimer();setInterval(updateTimer,1000);
+restoreSession().then(()=>{ render(); });
+renderAuthArea();updateTimer();setInterval(updateTimer,1000);
 </script>
 </body>
 </html>
