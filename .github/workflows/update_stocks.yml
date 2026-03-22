@@ -1,5 +1,4 @@
 name: 주가 데이터 업데이트
-
 on:
   schedule:
     - cron: '0 1 * * *'
@@ -9,26 +8,20 @@ on:
     - cron: '0 12 * * *'
     - cron: '0 15 * * *'
   workflow_dispatch:
-
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
       - name: 저장소 체크아웃
         uses: actions/checkout@v4
-
       - name: Python 설정
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
       - name: 패키지 설치
-        run: |
-          pip install yfinance pandas requests supabase
-
+        run: pip install yfinance pandas requests supabase
       - name: 주가 데이터 업데이트 실행
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: |
-          python update_stocks.py
+        run: python update_stocks.py
