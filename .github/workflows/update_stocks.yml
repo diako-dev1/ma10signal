@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: 패키지 설치
-        run: pip install yfinance pandas requests supabase
+        run: pip install yfinance pandas requests supabase lxml
       - name: 주가 데이터 업데이트 실행
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
