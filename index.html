@@ -298,12 +298,12 @@
     </div>
     <div class="tw"><table>
       <thead><tr>
-        <th style="width:28%" onclick="thSort('name')">종목 <span id="arr-name"></span></th>
-        <th style="width:16%" onclick="thSort('price')">현재가 <span id="arr-price"></span></th>
-        <th style="width:13%" class="hide-mobile" onclick="thSort('ma10')">MA10 <span id="arr-ma10"></span></th>
-        <th style="width:13%" onclick="thSort('gap')">이격률 <span id="arr-gap">▼</span></th>
-        <th style="width:20%">신호 등급</th>
-        <th style="width:8%" class="hide-mobile">섹터</th>
+        <th style="width:17%">신호 등급</th>
+        <th style="width:10%" class="sorted" onclick="thSort('gap')">이격률 <span id="arr-gap">▼</span></th>
+        <th style="width:25%" onclick="thSort('name')">종목명 <span id="arr-name"></span></th>
+        <th style="width:14%" onclick="thSort('price')">현재가 <span id="arr-price"></span></th>
+        <th style="width:13%" class="hide-mobile" onclick="thSort('ma10')">월봉 10선 <span id="arr-ma10"></span></th>
+        <th style="width:10%" class="hide-mobile">섹터</th>
         <th style="width:5%;text-align:center">★</th>
       </tr></thead>
       <tbody id="dash-tbody"></tbody>
@@ -358,7 +358,7 @@
     <div class="sg g4" id="hm-summary"></div>
     <div class="hg" id="hm-grid"></div>
     <div id="drill-panel"></div>
-    <div class="cc"><div class="ct">섹터별 MA10 위/아래 종목 수</div><div style="position:relative;height:190px"><canvas id="hm-chart"></canvas></div></div>
+    <div class="cc"><div class="ct">섹터별 월봉 10선 위/아래 종목 수</div><div style="position:relative;height:190px"><canvas id="hm-chart"></canvas></div></div>
   </div>
 
   <!-- MY PAGE -->
@@ -887,11 +887,11 @@ function renderStocksTable(){
   document.getElementById('dash-tbody').innerHTML=rows.map(s=>{
     const g=getGrade(s.gap);
     return`<tr class="cl" onclick="openDetail('${s.t}','${S.mkt}')">
+      <td><span class="bdg ${g.cls}">${g.label}</span></td>
+      <td class="${gc(s.gap)}" style="font-size:14px;font-weight:500;white-space:nowrap">${fg(s.gap)}</td>
       <td>${stockCell(s,isKr)}</td>
       <td style="font-size:14px;font-weight:500;white-space:nowrap">${fp(s.p,isKr)}</td>
       <td class="hide-mobile" style="font-size:14px;color:var(--color-text-secondary);white-space:nowrap">${fp(s.m,isKr)}</td>
-      <td class="${gc(s.gap)}" style="font-size:14px;font-weight:500;white-space:nowrap">${fg(s.gap)}</td>
-      <td><span class="bdg ${g.cls}">${g.label}</span></td>
       <td class="hide-mobile"><span style="font-size:13px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:2px 7px;border-radius:var(--border-radius-md)">${s.sec}</span></td>
       <td style="text-align:center">${favBtnHTML(s.t)}</td>
     </tr>`;
@@ -919,7 +919,7 @@ function renderDetail(){
   const db=document.getElementById('d-badge');db.textContent=grade.label;db.className='bdg '+grade.cls;db.style.fontSize='13px';db.style.padding='4px 12px';
   document.getElementById('d-stats').innerHTML=`
     <div class="sc"><div class="sc-l">현재가</div><div class="sc-v">${fp(s.p,isKr)}</div></div>
-    <div class="sc"><div class="sc-l">MA10</div><div class="sc-v" style="color:var(--color-text-secondary)">${fp(s.m,isKr)}</div></div>
+    <div class="sc"><div class="sc-l">월봉 10선</div><div class="sc-v" style="color:var(--color-text-secondary)">${fp(s.m,isKr)}</div></div>
     <div class="sc"><div class="sc-l">이격률</div><div class="sc-v ${gap>=0?'cvg':'cvr'}">${fg(gap)}</div></div>
     <div class="sc"><div class="sc-l">등급</div><div class="sc-v" style="font-size:13px">${grade.short}</div></div>`;
   const pct=Math.min(Math.max((gap+30)/60,0),1);
@@ -990,7 +990,7 @@ function renderMyPage(){
             <div style="font-size:16px;font-weight:500;color:var(--color-text-primary)">${priceStr}</div>
           </div>
           <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px 10px">
-            <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:2px">MA10</div>
+            <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:2px">월봉 10선</div>
             <div style="font-size:16px;color:var(--color-text-secondary)">${ma10Str}</div>
           </div>
           <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px 10px">
@@ -1033,8 +1033,8 @@ function renderHeatmap(){
   const trend=rat>60?'강세':rat>40?'중립':'약세';const tc=rat>60?'cvg':rat>40?'cva':'cvr';
   document.getElementById('hm-summary').innerHTML=`
     <div class="sc"><div class="sc-l">시장 강도</div><div class="sc-v ${tc}">${trend}</div></div>
-    <div class="sc"><div class="sc-l">MA10 위</div><div class="sc-v cvg">${ab}개</div></div>
-    <div class="sc"><div class="sc-l">MA10 아래</div><div class="sc-v cvr">${be}개</div></div>
+    <div class="sc"><div class="sc-l">월봉 10선 위</div><div class="sc-v cvg">${ab}개</div></div>
+    <div class="sc"><div class="sc-l">월봉 10선 아래</div><div class="sc-v cvr">${be}개</div></div>
     <div class="sc"><div class="sc-l">평균 이격률</div><div class="sc-v ${parseFloat(avgG)>=0?'cvg':'cvr'}">${parseFloat(avgG)>=0?'+':''}${avgG}%</div></div>`;
   document.getElementById('hm-grid').innerHTML=secs.map(s=>{
     const ratio=s.above/s.total;const dv=S.hmMode==='ratio'?ratio:s.avgGap;const bg=hmColor(dv,S.hmMode);
@@ -1055,7 +1055,7 @@ function renderHeatmap(){
   renderDrill();
   if(hmChart)hmChart.destroy();
   const ctx=document.getElementById('hm-chart').getContext('2d');
-  hmChart=new Chart(ctx,{type:'bar',data:{labels:secs.map(s=>s.name),datasets:[{label:'MA10 위',data:secs.map(s=>s.above),backgroundColor:'#10B981',borderRadius:2},{label:'MA10 아래',data:secs.map(s=>s.total-s.above),backgroundColor:'#F87171',borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10},autoSkip:false,maxRotation:35}},y:{stacked:true,grid:{color:'rgba(136,135,128,0.12)'},ticks:{font:{size:10},stepSize:1}}}}});
+  hmChart=new Chart(ctx,{type:'bar',data:{labels:secs.map(s=>s.name),datasets:[{label:'월봉 10선 위',data:secs.map(s=>s.above),backgroundColor:'#10B981',borderRadius:2},{label:'월봉 10선 아래',data:secs.map(s=>s.total-s.above),backgroundColor:'#F87171',borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10},autoSkip:false,maxRotation:35}},y:{stacked:true,grid:{color:'rgba(136,135,128,0.12)'},ticks:{font:{size:10},stepSize:1}}}}});
 }
 function toggleDrill(name){S.hmSec=S.hmSec===name?null:name;renderHeatmap();if(S.hmSec)setTimeout(()=>{const p=document.getElementById('drill-panel');if(p)p.scrollIntoView({behavior:'smooth',block:'nearest'});},50);}
 function renderDrill(){
@@ -1070,8 +1070,8 @@ function renderDrill(){
     <button onclick="toggleDrill('${S.hmSec}')" style="font-size:18px;color:var(--color-text-tertiary);cursor:pointer;border:none;background:none;line-height:1;padding:2px 4px">×</button>
   </div>
   <div class="drs">
-    <div class="drs-i"><div class="drs-l">MA10 위</div><div class="drs-v cvg">${ab}개</div></div>
-    <div class="drs-i"><div class="drs-l">MA10 아래</div><div class="drs-v cvr">${stocks.length-ab}개</div></div>
+    <div class="drs-i"><div class="drs-l">월봉 10선 위</div><div class="drs-v cvg">${ab}개</div></div>
+    <div class="drs-i"><div class="drs-l">월봉 10선 아래</div><div class="drs-v cvr">${stocks.length-ab}개</div></div>
     <div class="drs-i"><div class="drs-l">평균 이격률</div><div class="drs-v ${parseFloat(avgGap)>=0?'cvg':'cvr'}">${parseFloat(avgGap)>=0?'+':''}${avgGap}%</div></div>
     <div class="drs-i"><div class="drs-l">위 비율</div><div class="drs-v ${ab/stocks.length>=.5?'cvg':'cvr'}">${Math.round(ab/stocks.length*100)}%</div></div>
   </div>
@@ -1082,12 +1082,13 @@ function renderDrill(){
     <button class="pill${S.drillSort==='mc-desc'?' on':''}" onclick="S.drillSort='mc-desc';renderDrill()">시총순</button>
   </div>
   <table><thead><tr>
-    <th style="width:26%">종목</th><th style="width:17%">현재가</th><th style="width:13%">이격률</th><th style="width:22%">신호 등급</th><th style="width:14%" class="hide-mobile">시총</th><th style="width:8%;text-align:center">★</th>
+    <th style="width:18%">신호 등급</th><th style="width:11%">이격률</th><th style="width:24%">종목명</th><th style="width:15%">현재가</th><th style="width:12%" class="hide-mobile">시총</th><th style="width:8%;text-align:center">★</th>
   </tr></thead><tbody>${stocks.map(s=>{const g=getGrade(s.gap);return`<tr class="cl" onclick="openDetail('${s.t}','${S.hmMkt}')">
-    <td>${stockCell(s,isKr)}</td><td style="font-size:16px;font-weight:500">${fp(s.p,isKr)}</td>
-    <td class="${gc(s.gap)}" style="font-size:16px">${fg(s.gap)}</td><td><span class="bdg ${g.cls}">${g.label}</span></td>
+    <td><span class="bdg ${g.cls}">${g.label}</span></td>
+    <td class="${gc(s.gap)}" style="font-size:14px;font-weight:500;white-space:nowrap">${fg(s.gap)}</td><td>${stockCell(s,isKr)}</td><td style="font-size:14px;font-weight:500;white-space:nowrap">${fp(s.p,isKr)}</td>
     <td class="hide-mobile"><div style="font-size:11px;color:var(--color-text-secondary)">${s.mcs}</div><div class="mkb" style="width:${Math.round((s.mc/maxMc)*80)}%"></div></td>
     <td style="text-align:center">${favBtnHTML(s.t)}</td>
+  </tr>d>
   </tr>`;}).join('')}</tbody></table></div>`;
 }
 function setHmMkt(m){S.hmMkt=m;S.hmSec=null;renderHeatmap();}
