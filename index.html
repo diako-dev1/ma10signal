@@ -298,13 +298,13 @@
     </div>
     <div class="tw"><table>
       <thead><tr>
-        <th style="width:17%">신호 등급</th>
+        <th style="width:13%">신호 등급</th>
         <th style="width:10%" class="sorted" onclick="thSort('gap')">이격률 <span id="arr-gap">▼</span></th>
-        <th style="width:25%" onclick="thSort('name')">종목명 <span id="arr-name"></span></th>
+        <th style="width:20%" onclick="thSort('name')">종목명 <span id="arr-name"></span></th>
         <th style="width:14%" onclick="thSort('price')">현재가 <span id="arr-price"></span></th>
         <th style="width:13%" class="hide-mobile" onclick="thSort('ma10')">월봉 10선 <span id="arr-ma10"></span></th>
         <th style="width:10%" class="hide-mobile">섹터</th>
-        <th style="width:5%;text-align:center">★</th>
+        <th style="width:20%;text-align:center">★</th>
       </tr></thead>
       <tbody id="dash-tbody"></tbody>
     </table></div>
@@ -1082,7 +1082,7 @@ function renderDrill(){
     <button class="pill${S.drillSort==='mc-desc'?' on':''}" onclick="S.drillSort='mc-desc';renderDrill()">시총순</button>
   </div>
   <table><thead><tr>
-    <th style="width:18%">신호 등급</th><th style="width:11%">이격률</th><th style="width:24%">종목명</th><th style="width:15%">현재가</th><th style="width:12%" class="hide-mobile">시총</th><th style="width:8%;text-align:center">★</th>
+    <th style="width:13%">신호 등급</th><th style="width:10%">이격률</th><th style="width:20%">종목명</th><th style="width:14%">현재가</th><th style="width:13%" class="hide-mobile">시총</th><th style="width:20%;text-align:center">★</th>
   </tr></thead><tbody>${stocks.map(s=>{const g=getGrade(s.gap);return`<tr class="cl" onclick="openDetail('${s.t}','${S.hmMkt}')">
     <td><span class="bdg ${g.cls}">${g.label}</span></td>
     <td class="${gc(s.gap)}" style="font-size:14px;font-weight:500;white-space:nowrap">${fg(s.gap)}</td><td>${stockCell(s,isKr)}</td><td style="font-size:14px;font-weight:500;white-space:nowrap">${fp(s.p,isKr)}</td>
