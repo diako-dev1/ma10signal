@@ -70,6 +70,7 @@
     .sg{display:grid;gap:7px;margin-bottom:1.25rem}
     .g6{grid-template-columns:repeat(6,minmax(0,1fr))}
     .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .g5{grid-template-columns:repeat(5,minmax(0,1fr))}
     .sc{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:9px 11px}
     .sc-l{font-size:16px;color:var(--color-text-secondary);margin-bottom:3px}
     .sc-v{font-size:20px;font-weight:500;color:var(--color-text-primary)}
@@ -196,6 +197,7 @@
       /* 통계카드 */
       .g6{grid-template-columns:repeat(3,minmax(0,1fr))}
       .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .g5{grid-template-columns:repeat(3,minmax(0,1fr))}
       .sc-l{font-size:12px}
       .sc-v{font-size:14px}
       /* 히트맵 */
@@ -295,16 +297,19 @@
       <button class="sbtn" id="sb-gap-asc" onclick="setSort('gap','asc')">낮은순</button>
       <button class="sbtn" id="sb-grade-desc" onclick="setSort('grade','desc')">추천 강순</button>
       <button class="sbtn" id="sb-grade-asc" onclick="setSort('grade','asc')">약순</button>
+      <button class="sbtn" id="sb-mc-desc" onclick="setSort('mc','desc')">시가총액 높은순</button>
+      <button class="sbtn" id="sb-mc-asc" onclick="setSort('mc','asc')">낮은순</button>
     </div>
     <div class="tw"><table>
       <thead><tr>
         <th style="width:13%">신호 등급</th>
-        <th style="width:15%" class="sorted" onclick="thSort('gap')">이격률 <span id="arr-gap">▼</span></th>
-        <th style="width:20%" onclick="thSort('name')">종목명 <span id="arr-name"></span></th>
-        <th style="width:14%" onclick="thSort('price')">현재가 <span id="arr-price"></span></th>
-        <th style="width:13%" class="hide-mobile" onclick="thSort('ma10')">월봉 10선 <span id="arr-ma10"></span></th>
-        <th style="width:13%">섹터</th>
-        <th style="width:12%;text-align:center">★</th>
+        <th style="width:12%" class="sorted" onclick="thSort('gap')">이격률 <span id="arr-gap">▼</span></th>
+        <th style="width:19%" onclick="thSort('name')">종목명 <span id="arr-name"></span></th>
+        <th style="width:13%" onclick="thSort('price')">현재가 <span id="arr-price"></span></th>
+        <th style="width:12%" class="hide-mobile" onclick="thSort('ma10')">월봉 10선 <span id="arr-ma10"></span></th>
+        <th style="width:11%" onclick="thSort('mc')">시가총액 <span id="arr-mc"></span></th>
+        <th style="width:11%">섹터</th>
+        <th style="width:9%;text-align:center">★</th>
       </tr></thead>
       <tbody id="dash-tbody"></tbody>
     </table></div>
@@ -319,7 +324,7 @@
         <div class="bdg" id="d-badge" style="font-size:13px;padding:4px 12px"></div>
       </div>
     </div>
-    <div class="sg g4" id="d-stats"></div>
+    <div class="sg g5" id="d-stats"></div>
     <div class="cc">
       <div class="ct">월봉 이격률 추이 (최근 12개월)</div>
       <div style="position:relative;height:190px"><canvas id="d-chart"></canvas></div>
@@ -916,7 +921,7 @@ function renderStocks(){
   document.getElementById('grade-filter').innerHTML='<span style="font-size:14px;color:var(--color-text-secondary);margin-right:2px">등급:</span>'+
     gpm.map((g,i)=>`<span class="pill ${g[1]}${S.filter===i?' on':''}" onclick="setFilter(${i})">${g[0]} (${cnts[i]})</span>`).join('');
   renderStocksTable();
-  ['gap','price','ma10','name'].forEach(k=>{const a=document.getElementById('arr-'+k);if(a){a.textContent='';a.parentElement.classList.remove('sorted');}});
+  ['gap','price','ma10','name','mc'].forEach(k=>{const a=document.getElementById('arr-'+k);if(a){a.textContent='';a.parentElement.classList.remove('sorted');}});
   const sk=S.thKey||S.sortKey;const a=document.getElementById('arr-'+sk);
   if(a){a.textContent=(S.thKey?S.thDir:S.sortDir)==='desc'?'▼':'▲';a.parentElement.classList.add('sorted');}
   document.querySelectorAll('[id^="sb-"]').forEach(b=>b.classList.remove('on'));
@@ -931,6 +936,7 @@ function renderStocksTable(){
     if(sk==='gap'||sk==='grade')return sd==='desc'?b.gap-a.gap:a.gap-b.gap;
     if(sk==='price')return sd==='desc'?b.p-a.p:a.p-b.p;
     if(sk==='ma10')return sd==='desc'?b.m-a.m:a.m-b.m;
+    if(sk==='mc')return sd==='desc'?b.mc-a.mc:a.mc-b.mc;
     return sd==='asc'?a.n.localeCompare(b.n):b.n.localeCompare(a.n);
   });
   if(rows.length === 0 && !dataLoaded){
@@ -949,6 +955,7 @@ function renderStocksTable(){
       <td>${stockCell(s,isKr)}</td>
       <td style="font-size:14px;font-weight:500;white-space:nowrap">${fp(s.p,isKr)}</td>
       <td class="hide-mobile" style="font-size:14px;color:var(--color-text-secondary);white-space:nowrap">${fp(s.m,isKr)}</td>
+      <td style="font-size:13px;color:var(--color-text-secondary);white-space:nowrap">${s.mcs}</td>
       <td><span style="font-size:12px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:2px 6px;border-radius:var(--border-radius-md);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:100%">${s.sec}</span></td>
       <td style="text-align:center">${favBtnHTML(s.t)}</td>
     </tr>`;
@@ -978,6 +985,7 @@ function renderDetail(){
     <div class="sc"><div class="sc-l">현재가</div><div class="sc-v">${fp(s.p,isKr)}</div></div>
     <div class="sc"><div class="sc-l">월봉 10선</div><div class="sc-v" style="color:var(--color-text-secondary)">${fp(s.m,isKr)}</div></div>
     <div class="sc"><div class="sc-l">이격률</div><div class="sc-v ${gap>=0?'cvg':'cvr'}">${fg(gap)}</div></div>
+    <div class="sc"><div class="sc-l">시가총액</div><div class="sc-v" style="font-size:14px;color:var(--color-text-secondary)">${s.mcs||'-'}</div></div>
     <div class="sc"><div class="sc-l">등급</div><div class="sc-v" style="font-size:13px">${grade.short}</div></div>`;
   const pct=Math.min(Math.max((gap+30)/60,0),1);
   const fill=document.getElementById('gap-fill');fill.style.left='0';fill.style.width=(pct*100).toFixed(1)+'%';
