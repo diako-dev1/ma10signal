@@ -367,8 +367,8 @@
    ★ SUPABASE API LAYER
    아래 두 줄을 Supabase 프로젝트의 실제 값으로 교체하세요.
    ════════════════════════════════════════ */
-const SUPABASE_URL = 'https://ipcmifczwiuwxsokxmbt.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlwY21pZmN6d2l1d3hzb2t4bWJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNzQyNzAsImV4cCI6MjA4OTc1MDI3MH0.WYpcT-pmZMb2rYUDtGVD6Tv0MjcEQWCBcKNFLOEk8m8';
+const SUPABASE_URL = 'ipcmifczwiuwxsokxmbt.supabase.co'; // ← 교체 필요
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlwY21pZmN6d2l1d3hzb2t4bWJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNzQyNzAsImV4cCI6MjA4OTc1MDI3MH0.WYpcT-pmZMb2rYUDtGVD6Tv0MjcEQWCBcKNFLOEk8m8'; // ← 교체 필요
 /* ════════════════════════════════════════ */
 
 /* Supabase 경량 클라이언트 (CDN SDK 불필요 — fetch 직접 호출) */
@@ -926,15 +926,31 @@ function renderMyPage(){
       const isKr=ALL.kr.some(x=>x.t===t);
       const gap=cg(s.p,s.m);const grade=getGrade(gap);
       const name=isKr?s.n:s.t;const sub=isKr?s.t:s.n;
-      return`<div class="my-item">
-        <div class="my-item-left" onclick="openDetail('${t}','${isKr?'kr':'us'}')">
-          <div class="mi-main">${name}</div>
-          <div class="mi-sub">${sub} · ${s.sec} · ${s.mcs}</div>
+      const priceStr=fp(s.p,isKr);const ma10Str=fp(s.m,isKr);
+      return`<div class="my-item" style="flex-direction:column;align-items:stretch;gap:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <div class="my-item-left" onclick="openDetail('${t}','${isKr?'kr':'us'}')">
+            <div class="mi-main" style="font-size:16px">${name}</div>
+            <div class="mi-sub" style="font-size:13px">${sub} · ${s.sec} · ${s.mcs}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+            <span class="bdg ${grade.cls}" style="font-size:13px;padding:4px 10px">${grade.label}</span>
+            <button class="del-btn" onclick="doToggleFav('${t}')">×</button>
+          </div>
         </div>
-        <div class="my-item-right">
-          <span class="bdg ${grade.cls}">${grade.label}</span>
-          <span class="${gc(gap)}" style="font-size:13px;font-weight:500;min-width:48px;text-align:right">${fg(gap)}</span>
-          <button class="del-btn" onclick="doToggleFav('${t}')">×</button>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+          <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px 10px">
+            <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:2px">현재가</div>
+            <div style="font-size:16px;font-weight:500;color:var(--color-text-primary)">${priceStr}</div>
+          </div>
+          <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px 10px">
+            <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:2px">MA10</div>
+            <div style="font-size:16px;color:var(--color-text-secondary)">${ma10Str}</div>
+          </div>
+          <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px 10px">
+            <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:2px">이격률</div>
+            <div class="${gc(gap)}" style="font-size:16px;font-weight:500">${fg(gap)}</div>
+          </div>
         </div>
       </div>`;
     }).join('');
