@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="미국·한국 시가총액 Top 500 기준 월봉 MA10 이동평균선 매매 신호 제공 서비스">
+  <title>MA10 Signal — 월봉 이동평균선 매매 신호</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:#1a1a1a}
+    :root{
+      --color-text-primary:#1a1a1a;
+      --color-text-secondary:#6b7280;
+      --color-text-tertiary:#9ca3af;
+      --color-background-primary:#ffffff;
+      --color-background-secondary:#f9fafb;
+      --color-border-tertiary:rgba(0,0,0,0.1);
+      --color-border-secondary:rgba(0,0,0,0.18);
+      --border-radius-md:8px;
+      --border-radius-lg:12px;
+      --font-mono:'SF Mono','Consolas',monospace;
+    }
+    @media(prefers-color-scheme:dark){
+      :root{
+        --color-text-primary:#f9fafb;
+        --color-text-secondary:#9ca3af;
+        --color-text-tertiary:#6b7280;
+        --color-background-primary:#1f2937;
+        --color-background-secondary:#111827;
+        --color-border-tertiary:rgba(255,255,255,0.1);
+        --color-border-secondary:rgba(255,255,255,0.18);
+      }
+      body{background:#111827;color:#f9fafb}
+    }
+    .container{max-width:1100px;margin:0 auto;padding:0 1rem}
+    .app{padding:1rem 0}
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding-bottom:.875rem;flex-wrap:wrap;gap:8px}
+    .logo{font-size:20px;font-weight:500;color:var(--color-text-primary);letter-spacing:-.5px;cursor:pointer;flex-shrink:0;text-decoration:none}
+    .logo span{color:#1D9E75}
+    .topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .badge-sm{font-size:11px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:3px 8px;border-radius:var(--border-radius-md);border:.5px solid var(--color-border-tertiary);white-space:nowrap}
+    .timer-txt{font-size:11px;color:var(--color-text-secondary);white-space:nowrap}
+    .timer{font-weight:500;color:var(--color-text-primary);font-variant-numeric:tabular-nums}
+    .auth-btn{font-size:12px;padding:4px 12px;border-radius:var(--border-radius-md);border:.5px solid var(--color-border-secondary);background:none;color:var(--color-text-secondary);cursor:pointer;white-space:nowrap}
+    .auth-btn:hover{background:var(--color-background-secondary)}
+    .auth-btn.primary{background:#0F6E56;color:#E1F5EE;border-color:#0F6E56;font-weight:500}
+    .auth-btn.primary:hover{background:#085041}
+    .user-chip{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-text-secondary)}
+    .user-avatar{width:24px;height:24px;border-radius:50%;background:#E1F5EE;color:#085041;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .nav-wrap{border-bottom:.5px solid var(--color-border-tertiary);margin-bottom:1.25rem}
+    .nav-primary{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    .nav-primary::-webkit-scrollbar{display:none}
+    .npb{padding:9px 16px;font-size:13px;cursor:pointer;color:var(--color-text-secondary);border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;flex-shrink:0}
+    .npb.on{color:#0F6E56;border-bottom-color:#0F6E56;font-weight:500}
+    .nav-sec{display:flex;background:var(--color-background-secondary);border-top:.5px solid var(--color-border-tertiary);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    .nav-sec::-webkit-scrollbar{display:none}
+    .nav-sec.hidden{display:none}
+    .nsb{padding:6px 14px;font-size:12px;cursor:pointer;color:var(--color-text-secondary);border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;flex-shrink:0}
+    .nsb.on{color:#0F6E56;border-bottom-color:#0F6E56;font-weight:500}
+    .bc{display:flex;align-items:center;gap:6px;margin-bottom:1rem;font-size:12px;color:var(--color-text-secondary);flex-wrap:wrap}
+    .bci{cursor:pointer}.bci:hover{color:var(--color-text-primary)}
+    .bcs{color:var(--color-text-tertiary)}
+    .bcc{color:var(--color-text-primary);font-weight:500}
+    .page{display:none}.page.on{display:block}
+    .seg{display:flex;border:.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);overflow:hidden}
+    .seg-btn{padding:5px 12px;font-size:12px;cursor:pointer;background:none;border:none;color:var(--color-text-secondary)}
+    .seg-btn.on{background:#0F6E56;color:#E1F5EE;font-weight:500}
+    .card{background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.125rem;margin-bottom:1rem}
+    .card-title{font-size:15px;font-weight:500;margin-bottom:8px;color:var(--color-text-primary)}
+    .sg{display:grid;gap:7px;margin-bottom:1.25rem}
+    .g6{grid-template-columns:repeat(6,minmax(0,1fr))}
+    .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .sc{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:9px 11px}
+    .sc-l{font-size:11px;color:var(--color-text-secondary);margin-bottom:3px}
+    .sc-v{font-size:18px;font-weight:500;color:var(--color-text-primary)}
+    .cvg{color:#0F6E56}.cvr{color:#A32D2D}.cva{color:#854F0B}
+    .pr{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:.875rem;align-items:center}
+    .pill{font-size:11px;padding:3px 8px;border-radius:20px;cursor:pointer;border:.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);color:var(--color-text-secondary);white-space:nowrap}
+    .pill.on{font-weight:500}
+    .gp5.on{background:#9FE1CB;color:#04342C;border-color:#5DCAA5}
+    .gp4.on{background:#C0DD97;color:#173404;border-color:#97C459}
+    .gp3.on{background:#FAC775;color:#412402;border-color:#EF9F27}
+    .gp2.on{background:#F5C4B3;color:#4A1B0C;border-color:#F0997B}
+    .gp1.on{background:#F7C1C1;color:#501313;border-color:#F09595}
+    .gp0.on{background:#E24B4A;color:#FCEBEB;border-color:#A32D2D}
+    .sbtn{font-size:11px;padding:3px 9px;border-radius:var(--border-radius-md);border:.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-secondary);cursor:pointer}
+    .sbtn.on{background:#0F6E56;color:#E1F5EE;border-color:#0F6E56;font-weight:500}
+    .sr{display:flex;gap:8px;margin-bottom:1.125rem}
+    .sr input{flex:1;border:.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:8px 12px;font-size:13px;background:var(--color-background-primary);color:var(--color-text-primary);min-width:0}
+    .sr input:focus{outline:none;border-color:#1D9E75}
+    .sr button{padding:8px 14px;border-radius:var(--border-radius-md);background:#0F6E56;color:#E1F5EE;border:none;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+    .tw{background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:1rem}
+    table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+    th{padding:8px 10px;text-align:left;font-size:11px;font-weight:400;color:var(--color-text-secondary);border-bottom:.5px solid var(--color-border-tertiary);white-space:nowrap;cursor:pointer;user-select:none}
+    th:hover{color:var(--color-text-primary)}
+    th.sorted{color:#0F6E56}
+    td{padding:9px 10px;border-bottom:.5px solid var(--color-border-tertiary);vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--color-text-primary)}
+    tr:last-child td{border-bottom:none}
+    tr.cl:hover td{background:var(--color-background-secondary);cursor:pointer}
+    .us-tkr{font-weight:500;font-size:15px;color:var(--color-text-primary);line-height:1.25}
+    .us-nm{font-size:11px;color:var(--color-text-secondary);margin-top:1px;overflow:hidden;text-overflow:ellipsis}
+    .kr-nm{font-weight:500;font-size:15px;color:var(--color-text-primary);line-height:1.25}
+    .kr-cd{font-size:10px;color:var(--color-text-tertiary);margin-top:1px;font-variant-numeric:tabular-nums}
+    .bdg{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+    .b5{background:#9FE1CB;color:#04342C}.b4{background:#C0DD97;color:#173404}.b3{background:#FAC775;color:#412402}
+    .b2{background:#F5C4B3;color:#4A1B0C}.b1{background:#F7C1C1;color:#501313}.b0{background:#E24B4A;color:#FCEBEB}
+    .gpos{color:#0F6E56;font-weight:500}.gneg{color:#A32D2D;font-weight:500}.gwarn{color:#854F0B;font-weight:500}
+    .fav-btn{background:none;border:none;cursor:pointer;font-size:16px;padding:2px 4px;line-height:1;color:var(--color-text-tertiary);flex-shrink:0}
+    .fav-btn.active{color:#EF9F27}
+    .fav-btn:hover{color:#BA7517}
+    .fav-btn.locked{cursor:default;opacity:.4}
+    .dh{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;gap:8px}
+    .dh-left{flex:1;min-width:0}
+    .dtitle{font-size:20px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--color-text-primary)}
+    .dsub{font-size:12px;color:var(--color-text-secondary);margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    .sl{font-size:11px;padding:2px 8px;border-radius:var(--border-radius-md);background:#E1F5EE;color:#085041;cursor:pointer;border:.5px solid #5DCAA5;font-weight:500;white-space:nowrap}
+    .sl:hover{background:#9FE1CB}
+    .dh-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+    .gbt{position:relative;height:7px;background:var(--color-background-secondary);border-radius:4px;margin:5px 0}
+    .gbf{position:absolute;top:0;height:7px;border-radius:4px}
+    .gax{display:flex;justify-content:space-between;font-size:10px;color:var(--color-text-tertiary)}
+    .hc{background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:1rem}
+    .hh{padding:10px 14px;border-bottom:.5px solid var(--color-border-tertiary);font-size:13px;font-weight:500;color:var(--color-text-primary)}
+    table.ht{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+    table.ht th{padding:7px 12px;font-size:11px;font-weight:400;color:var(--color-text-secondary);border-bottom:.5px solid var(--color-border-tertiary)}
+    table.ht td{padding:8px 12px;border-bottom:.5px solid var(--color-border-tertiary);color:var(--color-text-primary)}
+    table.ht tr:last-child td{border-bottom:none}
+    .hg{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:7px;margin-bottom:1.25rem}
+    .hmc{background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:0 var(--border-radius-lg) var(--border-radius-lg) 0;padding:10px 12px;cursor:pointer;border-left-width:3px}
+    .hmc:hover{border-color:var(--color-border-secondary)}
+    .hmc.sel{border-color:#1D9E75!important;border-width:1.5px;border-left-width:3px}
+    .bt{height:5px;background:var(--color-background-secondary);border-radius:3px;margin-bottom:5px;overflow:hidden}
+    .bf{height:5px;border-radius:3px}
+    .dr{background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:1rem}
+    .drh{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:.5px solid var(--color-border-tertiary);background:var(--color-background-secondary)}
+    .drs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-bottom:.5px solid var(--color-border-tertiary)}
+    .drs-i{padding:9px 12px;border-right:.5px solid var(--color-border-tertiary)}
+    .drs-i:last-child{border-right:none}
+    .drs-l{font-size:11px;color:var(--color-text-secondary);margin-bottom:2px}
+    .drs-v{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+    .mkb{height:4px;background:#9FE1CB;border-radius:2px;margin-top:3px}
+    .cc{background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem;margin-bottom:1rem}
+    .ct{font-size:12px;color:var(--color-text-secondary);margin-bottom:10px;font-weight:500}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:1rem}
+    .modal-box{background:var(--color-background-primary);border-radius:var(--border-radius-lg);border:.5px solid var(--color-border-tertiary);padding:1.75rem;width:100%;max-width:360px}
+    .modal-title{font-size:18px;font-weight:500;margin-bottom:4px;text-align:center;color:var(--color-text-primary)}
+    .modal-sub{font-size:12px;color:var(--color-text-secondary);text-align:center;margin-bottom:1.5rem}
+    .modal-tabs{display:flex;border:.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);overflow:hidden;margin-bottom:1.25rem}
+    .modal-tab{flex:1;padding:7px;font-size:13px;cursor:pointer;background:none;border:none;color:var(--color-text-secondary);text-align:center}
+    .modal-tab.on{background:#0F6E56;color:#E1F5EE;font-weight:500}
+    .form-group{margin-bottom:1rem}
+    .form-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px;display:block}
+    .form-input{width:100%;border:.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:9px 12px;font-size:13px;background:var(--color-background-primary);color:var(--color-text-primary)}
+    .form-input:focus{outline:none;border-color:#1D9E75}
+    .form-error{font-size:11px;color:#A32D2D;margin-top:4px;min-height:16px}
+    .form-submit{width:100%;padding:10px;border-radius:var(--border-radius-md);background:#0F6E56;color:#E1F5EE;border:none;font-size:14px;font-weight:500;cursor:pointer;margin-top:.5rem}
+    .form-submit:hover{background:#085041}
+    .form-submit:disabled{opacity:.5;cursor:not-allowed}
+    .form-hint{font-size:11px;color:var(--color-text-secondary);text-align:center;margin-top:1rem;line-height:1.6}
+    .form-link{color:#0F6E56;cursor:pointer;text-decoration:underline}
+    .toast-wrap{position:fixed;top:1rem;right:1rem;z-index:2000;display:flex;flex-direction:column;gap:8px;max-width:320px}
+    .toast{padding:10px 16px;border-radius:var(--border-radius-md);font-size:13px;border:.5px solid;animation:slideIn .2s ease}
+    @keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    .toast.success{background:#E1F5EE;color:#085041;border-color:#5DCAA5}
+    .toast.error{background:#FCEBEB;color:#791F1F;border-color:#F09595}
+    .toast.info{background:var(--color-background-secondary);color:var(--color-text-secondary);border-color:var(--color-border-secondary)}
+    .my-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:.5px solid var(--color-border-tertiary)}
+    .my-item:last-child{border-bottom:none;padding-bottom:0}
+    .my-item:first-child{padding-top:0}
+    .my-item-left{flex:1;min-width:0;cursor:pointer}
+    .my-item-left:hover .mi-main{color:#0F6E56}
+    .mi-main{font-size:14px;font-weight:500;color:var(--color-text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .mi-sub{font-size:11px;color:var(--color-text-secondary);margin-top:1px}
+    .my-item-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+    .del-btn{background:none;border:none;cursor:pointer;font-size:16px;color:var(--color-text-tertiary);padding:2px 4px;line-height:1}
+    .del-btn:hover{color:#A32D2D}
+    .gb{font-size:13px;color:var(--color-text-secondary);line-height:1.7}
+    .gf{background:var(--color-background-secondary);padding:10px 14px;font-family:var(--font-mono);font-size:13px;color:var(--color-text-primary);margin:10px 0;border-left:3px solid #1D9E75}
+    .sl2{list-style:none;padding:0}
+    .si{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start}
+    .sn{width:22px;height:22px;border-radius:50%;background:#E1F5EE;color:#085041;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+    .sb2{flex:1}
+    .st{font-size:13px;font-weight:500;margin-bottom:2px;color:var(--color-text-primary)}
+    .sd{font-size:12px;color:var(--color-text-secondary);line-height:1.6}
+    .gt{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+    .gt th{text-align:left;padding:6px 8px;font-size:11px;font-weight:400;color:var(--color-text-secondary);border-bottom:.5px solid var(--color-border-tertiary)}
+    .gt td{padding:7px 8px;border-bottom:.5px solid var(--color-border-tertiary);vertical-align:middle;color:var(--color-text-primary)}
+    .gt tr:last-child td{border-bottom:none}
+    .fqi{border-bottom:.5px solid var(--color-border-tertiary)}
+    .fqq{width:100%;text-align:left;padding:11px 0;font-size:13px;font-weight:500;cursor:pointer;background:none;border:none;color:var(--color-text-primary);display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .fqa-arrow{font-size:11px;color:var(--color-text-tertiary);transition:transform .2s;flex-shrink:0}
+    .fqa{font-size:12px;color:var(--color-text-secondary);line-height:1.7;padding-bottom:11px;display:none}
+    .fqa.open{display:block}
+    .notice{background:#E1F5EE;border-radius:var(--border-radius-md);padding:9px 12px;font-size:12px;color:#085041;margin-top:8px;line-height:1.6}
+    @media(max-width:600px){
+      .g6{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .drs{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .drs-i:nth-child(2){border-right:none}
+      .drs-i:nth-child(3){border-top:.5px solid var(--color-border-tertiary)}
+      .drs-i:nth-child(4){border-top:.5px solid var(--color-border-tertiary)}
+      .hg{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .sc-v{font-size:16px}
+      .hide-mobile{display:none!important}
+      td.hide-mobile,th.hide-mobile{display:none}
+      .dtitle{font-size:17px}
+      .modal-box{margin:1rem}
+      .toast-wrap{top:auto;bottom:1rem;left:1rem;right:1rem;max-width:none}
+    }
+    @media(max-width:380px){
+      .g6{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+  </style>
+</head>
+<body>
+<div id="toast-wrap" class="toast-wrap"></div>
+<div id="auth-modal-wrap"></div>
+
+<div class="container">
+<div class="app">
+  <div class="topbar">
+    <a class="logo" onclick="nav('stocks',S.mkt);return false;" href="#">MA<span>10</span> Signal</a>
+    <div class="topbar-right">
+      <div class="badge-sm" id="last-update">갱신: --:--</div>
+      <div class="timer-txt">다음 <span class="timer" id="timer">--:--</span></div>
+      <div id="auth-area"></div>
+    </div>
+  </div>
+
+  <div class="nav-wrap">
+    <div class="nav-primary">
+      <button class="npb on" id="pnav-stocks" onclick="nav('stocks',S.mkt)">주식 종목</button>
+      <button class="npb" id="pnav-heatmap" onclick="nav('heatmap')">섹터 히트맵</button>
+      <button class="npb" id="pnav-mypage" onclick="nav('mypage')">마이 페이지</button>
+      <button class="npb" id="pnav-guide" onclick="nav('guide',S.guideTab)">가이드</button>
+    </div>
+    <div class="nav-sec hidden" id="nav-sec"></div>
+  </div>
+
+  <div class="bc" id="bc"></div>
+
+  <!-- STOCKS -->
+  <div class="page on" id="page-stocks">
+    <div class="sr"><input type="text" id="si" placeholder="종목 검색 (AAPL, 삼성전자, 005930...)"><button onclick="doSearch()">검색</button></div>
+    <div class="sg g6" id="dash-stats"></div>
+    <div class="pr" id="grade-filter"></div>
+    <div class="pr">
+      <span style="font-size:11px;color:var(--color-text-secondary)">정렬:</span>
+      <button class="sbtn on" id="sb-gap-desc" onclick="setSort('gap','desc')">이격률 높은순</button>
+      <button class="sbtn" id="sb-gap-asc" onclick="setSort('gap','asc')">낮은순</button>
+      <button class="sbtn" id="sb-grade-desc" onclick="setSort('grade','desc')">추천 강순</button>
+      <button class="sbtn" id="sb-grade-asc" onclick="setSort('grade','asc')">약순</button>
+    </div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th style="width:26%" onclick="thSort('name')">종목 <span id="arr-name"></span></th>
+        <th style="width:15%" onclick="thSort('price')">현재가 <span id="arr-price"></span></th>
+        <th style="width:13%" class="hide-mobile" onclick="thSort('ma10')">MA10 <span id="arr-ma10"></span></th>
+        <th style="width:12%" class="sorted" onclick="thSort('gap')">이격률 <span id="arr-gap">▼</span></th>
+        <th style="width:20%">신호 등급</th>
+        <th style="width:8%" class="hide-mobile">섹터</th>
+        <th style="width:6%;text-align:center">★</th>
+      </tr></thead>
+      <tbody id="dash-tbody"></tbody>
+    </table></div>
+  </div>
+
+  <!-- DETAIL -->
+  <div class="page" id="page-detail">
+    <div class="dh">
+      <div class="dh-left"><div class="dtitle" id="d-ticker"></div><div class="dsub" id="d-sub"></div></div>
+      <div class="dh-right">
+        <span id="d-fav-wrap"></span>
+        <div class="bdg" id="d-badge" style="font-size:13px;padding:4px 12px"></div>
+      </div>
+    </div>
+    <div class="sg g4" id="d-stats"></div>
+    <div class="cc">
+      <div class="ct">월봉 이격률 추이 (최근 12개월)</div>
+      <div style="position:relative;height:190px"><canvas id="d-chart"></canvas></div>
+      <div style="margin:10px 0 3px">
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:3px">현재 이격률 위치</div>
+        <div class="gbt"><div class="gbf" id="gap-fill"></div></div>
+        <div class="gax"><span>-30%</span><span>-10%</span><span>0%</span><span>+10%</span><span>+30%+</span></div>
+      </div>
+    </div>
+    <div class="card" id="d-signal-card"></div>
+    <div class="hc">
+      <div class="hh">신호 전환 이력</div>
+      <table class="ht"><thead><tr>
+        <th style="width:22%">날짜</th><th style="width:30%">등급 변화</th><th style="width:18%">이격률</th><th style="width:30%">가격 / 대비</th>
+      </tr></thead><tbody id="d-hist"></tbody></table>
+    </div>
+  </div>
+
+  <!-- HEATMAP -->
+  <div class="page" id="page-heatmap">
+    <div class="pr">
+      <div class="seg" id="hm-mkt-seg"><button class="seg-btn on" onclick="setHmMkt('us')">미국</button><button class="seg-btn" onclick="setHmMkt('kr')">한국</button></div>
+      <div class="seg" id="hm-mode-seg"><button class="seg-btn on" onclick="setHmMode('ratio')">위 비율</button><button class="seg-btn" onclick="setHmMode('avg')">이격률</button></div>
+      <div style="display:flex;align-items:center;gap:5px;margin-left:auto;font-size:11px;color:var(--color-text-secondary)">
+        <span>약세</span>
+        <div style="display:flex;gap:2px">
+          <div style="width:11px;height:11px;border-radius:2px;background:#E24B4A"></div>
+          <div style="width:11px;height:11px;border-radius:2px;background:#F0997B"></div>
+          <div style="width:11px;height:11px;border-radius:2px;background:#FAC775"></div>
+          <div style="width:11px;height:11px;border-radius:2px;background:#9FE1CB"></div>
+          <div style="width:11px;height:11px;border-radius:2px;background:#1D9E75"></div>
+        </div>
+        <span>강세</span>
+      </div>
+    </div>
+    <div class="sg g4" id="hm-summary"></div>
+    <div class="hg" id="hm-grid"></div>
+    <div id="drill-panel"></div>
+    <div class="cc"><div class="ct">섹터별 MA10 위/아래 종목 수</div><div style="position:relative;height:190px"><canvas id="hm-chart"></canvas></div></div>
+  </div>
+
+  <!-- MY PAGE -->
+  <div class="page" id="page-mypage"></div>
+
+  <!-- GUIDE -->
+  <div class="page" id="page-guide">
+    <div id="guide-intro" class="guide-section">
+      <div class="card"><div class="card-title">월봉 MA10 전략이란?</div>
+        <div class="gb">월봉 기준 10개월 단순이동평균선(MA10)을 핵심 지지·저항 기준으로 삼는 중장기 추세 추종 전략입니다.</div>
+        <div class="gf">(현재가 − MA10) ÷ MA10 × 100 = 이격률(%)</div>
+        <div class="gb">이격률이 양수(+)이면 이평선 위, 음수(-)이면 이평선 아래입니다.</div>
+      </div>
+      <div class="card"><div class="card-title">월봉을 사용하는 이유</div>
+        <ul class="sl2">
+          <li class="si"><div class="sn">1</div><div class="sb2"><div class="st">노이즈 최소화</div><div class="sd">단기 급등락에 흔들리지 않고 진짜 추세 전환만 감지합니다.</div></div></li>
+          <li class="si"><div class="sn">2</div><div class="sb2"><div class="st">명확한 손절 기준</div><div class="sd">MA10이 손절선이 됩니다. 이평선 아래로 종가 확정 시 즉시 신호 전환.</div></div></li>
+          <li class="si"><div class="sn">3</div><div class="sb2"><div class="st">장기 수익률 우위</div><div class="sd">S&amp;P500 기준 2000~2025 백테스트에서 MDD가 Buy&amp;Hold 대비 약 40% 낮았습니다.</div></div></li>
+        </ul>
+      </div>
+      <div class="card"><div class="card-title">데이터 갱신 주기</div>
+        <div class="gb" style="margin-bottom:8px">매일 6회(10시·12시·15시·18시·21시·자정) 갱신됩니다.</div>
+        <div class="notice">갱신 시각은 한국 표준시(KST) 기준입니다.</div>
+      </div>
+    </div>
+    <div id="guide-grade" class="guide-section" style="display:none">
+      <div class="card"><div class="card-title">6단계 매매 등급 체계</div>
+        <table class="gt">
+          <thead><tr><th>등급</th><th>이격률</th><th class="hide-mobile">신규 매수</th><th>기존 보유</th></tr></thead>
+          <tbody>
+            <tr><td><span class="bdg b5">★★★★★ 적극 매수</span></td><td style="color:#0F6E56;font-weight:500">0~+15%</td><td class="hide-mobile">50~100% 진입</td><td>추가 매수</td></tr>
+            <tr><td><span class="bdg b4">★★★★ 매수</span></td><td style="color:#3B6D11;font-weight:500">+15~+30%</td><td class="hide-mobile">30~50% 분할</td><td>보유 유지</td></tr>
+            <tr><td><span class="bdg b3">★★★ 보유/관망</span></td><td style="color:#854F0B;font-weight:500">+30% 초과</td><td class="hide-mobile">진입 자제</td><td>차익 고려</td></tr>
+            <tr><td><span class="bdg b2">★★ 주의/관망</span></td><td style="color:#993C1D;font-weight:500">-5~0%</td><td class="hide-mobile">이탈 확인</td><td>손절 점검</td></tr>
+            <tr><td><span class="bdg b1">★ 매도</span></td><td style="color:#A32D2D;font-weight:500">-5~-20%</td><td class="hide-mobile">진입 금지</td><td>분할 매도</td></tr>
+            <tr><td><span class="bdg b0">☆ 강력 매도</span></td><td style="color:#791F1F;font-weight:500">-20% 초과</td><td class="hide-mobile">진입 금지</td><td>즉시 손절</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div id="guide-faq" class="guide-section" style="display:none">
+      <div class="card"><div class="card-title">자주 묻는 질문</div><div id="faq-list"></div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+/* ════════════════════════════════════════
+   ★ API LAYER — 실서비스 연동 시 이 섹션을 교체하세요
+   BASE_URL을 실제 서버 주소로 변경하고
+   아래 mock 함수들을 실제 fetch 호출로 교체합니다.
+   ════════════════════════════════════════ */
+const BASE_URL = 'https://api.ma10signal.com'; // TODO: 실서버 URL로 교체
+
+const mockDB = {
+  users: [{ email:'demo@ma10.com', password:'demo1234', name:'데모 유저' }],
+  favs: {}
+};
+let mockToken = null;
+
+async function apiSignup(email, password, name) {
+  await delay(600);
+  if (mockDB.users.find(u => u.email === email)) throw new Error('이미 사용 중인 이메일입니다.');
+  mockDB.users.push({ email, password, name });
+  mockDB.favs[email] = new Set();
+  return { ok: true };
+  /* TODO: 실서비스 코드로 교체
+  const res = await fetch(`${BASE_URL}/auth/signup`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ email, password, name })
+  });
+  if (!res.ok) throw new Error((await res.json()).message);
+  return res.json(); */
+}
+
+async function apiLogin(email, password) {
+  await delay(600);
+  const user = mockDB.users.find(u => u.email === email && u.password === password);
+  if (!user) throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
+  mockToken = `mock-token-${email}`;
+  if (!mockDB.favs[email]) mockDB.favs[email] = new Set();
+  return { token: mockToken, user: { email: user.email, name: user.name } };
+  /* TODO: 실서비스 코드로 교체
+  const res = await fetch(`${BASE_URL}/auth/login`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ email, password })
+  });
+  if (!res.ok) throw new Error((await res.json()).message);
+  const data = await res.json();
+  localStorage.setItem('ma10_token', data.token);
+  return data; */
+}
+
+async function apiLogout() {
+  await delay(200);
+  mockToken = null;
+  /* TODO: 실서비스 코드로 교체
+  await fetch(`${BASE_URL}/auth/logout`, { method:'POST',
+    headers:{ Authorization: `Bearer ${localStorage.getItem('ma10_token')}` }
+  });
+  localStorage.removeItem('ma10_token'); */
+}
+
+async function apiGetFavs(email) {
+  await delay(300);
+  return [...(mockDB.favs[email] || [])];
+  /* TODO: 실서비스 코드로 교체
+  const res = await fetch(`${BASE_URL}/favs`, {
+    headers:{ Authorization: `Bearer ${localStorage.getItem('ma10_token')}` }
+  });
+  return (await res.json()).tickers; */
+}
+
+async function apiAddFav(email, ticker) {
+  await delay(200);
+  if (!mockDB.favs[email]) mockDB.favs[email] = new Set();
+  mockDB.favs[email].add(ticker);
+  return { ok: true };
+  /* TODO: 실서비스 코드로 교체
+  await fetch(`${BASE_URL}/favs/${ticker}`, { method:'POST',
+    headers:{ Authorization: `Bearer ${localStorage.getItem('ma10_token')}` }
+  }); */
+}
+
+async function apiRemoveFav(email, ticker) {
+  await delay(200);
+  mockDB.favs[email]?.delete(ticker);
+  return { ok: true };
+  /* TODO: 실서비스 코드로 교체
+  await fetch(`${BASE_URL}/favs/${ticker}`, { method:'DELETE',
+    headers:{ Authorization: `Bearer ${localStorage.getItem('ma10_token')}` }
+  }); */
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+/* ════════════════════════════════════════ */
+
+/* ── DATA (TODO: 실서비스에서 API로 교체) ── */
+const ALL={
+  us:[
+    {t:'AAPL',n:'Apple Inc.',p:213.5,m:198.2,sec:'기술',mc:3300,mcs:'$3.3조'},
+    {t:'MSFT',n:'Microsoft Corp.',p:415.8,m:388.4,sec:'기술',mc:3100,mcs:'$3.1조'},
+    {t:'NVDA',n:'NVIDIA Corp.',p:875.4,m:812.3,sec:'반도체',mc:2200,mcs:'$2.2조'},
+    {t:'GOOGL',n:'Alphabet Inc.',p:172.4,m:175.5,sec:'기술',mc:2100,mcs:'$2.1조'},
+    {t:'AMZN',n:'Amazon.com',p:195.2,m:191.8,sec:'이커머스',mc:2000,mcs:'$2.0조'},
+    {t:'META',n:'Meta Platforms',p:530.1,m:490.6,sec:'소셜미디어',mc:1400,mcs:'$1.4조'},
+    {t:'TSM',n:'TSMC',p:172.3,m:158.4,sec:'반도체',mc:893,mcs:'$893B'},
+    {t:'AVGO',n:'Broadcom Inc.',p:1642.0,m:1510.2,sec:'반도체',mc:768,mcs:'$768B'},
+    {t:'LLY',n:'Eli Lilly',p:785.2,m:920.5,sec:'제약',mc:745,mcs:'$745B'},
+    {t:'JPM',n:'JPMorgan Chase',p:224.7,m:210.3,sec:'금융',mc:648,mcs:'$648B'},
+    {t:'V',n:'Visa Inc.',p:276.5,m:266.8,sec:'금융',mc:569,mcs:'$569B'},
+    {t:'TSLA',n:'Tesla Inc.',p:248.3,m:295.1,sec:'전기차',mc:792,mcs:'$792B'},
+    {t:'MA',n:'Mastercard Inc.',p:492.3,m:468.1,sec:'금융',mc:457,mcs:'$457B'},
+    {t:'UNH',n:'UnitedHealth',p:512.4,m:498.2,sec:'헬스케어',mc:473,mcs:'$473B'},
+    {t:'XOM',n:'ExxonMobil',p:112.4,m:118.2,sec:'에너지',mc:448,mcs:'$448B'},
+    {t:'COST',n:'Costco Wholesale',p:892.3,m:848.4,sec:'소비재',mc:396,mcs:'$396B'},
+    {t:'BAC',n:'Bank of America',p:42.8,m:40.1,sec:'금융',mc:335,mcs:'$335B'},
+    {t:'MRK',n:'Merck & Co.',p:132.4,m:128.5,sec:'헬스케어',mc:335,mcs:'$335B'},
+    {t:'AMD',n:'Adv. Micro Dev.',p:178.5,m:162.3,sec:'반도체',mc:288,mcs:'$288B'},
+    {t:'WMT',n:'Walmart Inc.',p:92.4,m:85.2,sec:'소비재',mc:748,mcs:'$748B'},
+    {t:'HD',n:'Home Depot',p:412.4,m:385.2,sec:'소비재',mc:410,mcs:'$410B'},
+    {t:'QCOM',n:'Qualcomm',p:168.2,m:172.1,sec:'반도체',mc:187,mcs:'$187B'},
+    {t:'NOW',n:'ServiceNow',p:892.3,m:820.4,sec:'기술',mc:185,mcs:'$185B'},
+    {t:'GS',n:'Goldman Sachs',p:512.3,m:488.4,sec:'금융',mc:171,mcs:'$171B'},
+    {t:'TMO',n:'Thermo Fisher',p:592.3,m:568.4,sec:'헬스케어',mc:228,mcs:'$228B'},
+    {t:'ABBV',n:'AbbVie Inc.',p:178.4,m:172.1,sec:'헬스케어',mc:315,mcs:'$315B'},
+    {t:'CVX',n:'Chevron Corp.',p:148.4,m:158.2,sec:'에너지',mc:268,mcs:'$268B'},
+    {t:'CRM',n:'Salesforce',p:312.5,m:295.0,sec:'기술',mc:302,mcs:'$302B'},
+    {t:'ADBE',n:'Adobe Inc.',p:485.2,m:512.3,sec:'기술',mc:218,mcs:'$218B'},
+    {t:'ORCL',n:'Oracle Corp.',p:142.8,m:132.1,sec:'기술',mc:390,mcs:'$390B'},
+  ],
+  kr:[
+    {t:'005930',n:'삼성전자',p:62400,m:58100,sec:'반도체',mc:372,mcs:'372조'},
+    {t:'000660',n:'SK하이닉스',p:218000,m:198000,sec:'반도체',mc:158,mcs:'158조'},
+    {t:'005380',n:'현대차',p:213000,m:208000,sec:'자동차',mc:45,mcs:'45조'},
+    {t:'373220',n:'LG에너지솔루션',p:385000,m:402000,sec:'2차전지',mc:90,mcs:'90조'},
+    {t:'000270',n:'기아',p:98500,m:92300,sec:'자동차',mc:40,mcs:'40조'},
+    {t:'207940',n:'삼성바이오로직스',p:897000,m:845000,sec:'바이오',mc:63,mcs:'63조'},
+    {t:'105560',n:'KB금융',p:92000,m:85000,sec:'금융',mc:38,mcs:'38조'},
+    {t:'005490',n:'POSCO홀딩스',p:378000,m:412000,sec:'철강',mc:32,mcs:'32조'},
+    {t:'035420',n:'NAVER',p:182000,m:198000,sec:'IT플랫폼',mc:30,mcs:'30조'},
+    {t:'055550',n:'신한지주',p:58000,m:54000,sec:'금융',mc:28,mcs:'28조'},
+    {t:'003670',n:'포스코퓨처엠',p:248000,m:312000,sec:'2차전지',mc:28,mcs:'28조'},
+    {t:'068270',n:'셀트리온',p:162000,m:175000,sec:'바이오',mc:21,mcs:'21조'},
+    {t:'086790',n:'하나금융지주',p:68000,m:62000,sec:'금융',mc:20,mcs:'20조'},
+    {t:'051910',n:'LG화학',p:342000,m:338000,sec:'화학',mc:24,mcs:'24조'},
+    {t:'006400',n:'삼성SDI',p:312000,m:342000,sec:'2차전지',mc:21,mcs:'21조'},
+    {t:'035720',n:'카카오',p:38000,m:45000,sec:'IT플랫폼',mc:17,mcs:'17조'},
+    {t:'128940',n:'한미약품',p:312000,m:298000,sec:'바이오',mc:18,mcs:'18조'},
+    {t:'012330',n:'현대모비스',p:248000,m:232000,sec:'자동차',mc:23,mcs:'23조'},
+    {t:'316140',n:'우리금융지주',p:18000,m:16500,sec:'금융',mc:12,mcs:'12조'},
+    {t:'247540',n:'에코프로비엠',p:182000,m:212000,sec:'2차전지',mc:19,mcs:'19조'},
+    {t:'086520',n:'에코프로',p:92000,m:118000,sec:'2차전지',mc:12,mcs:'12조'},
+    {t:'058470',n:'리노공업',p:178000,m:165000,sec:'반도체',mc:22,mcs:'22조'},
+    {t:'042700',n:'한미반도체',p:92000,m:88000,sec:'반도체',mc:18,mcs:'18조'},
+    {t:'185750',n:'종근당',p:98000,m:112000,sec:'바이오',mc:7,mcs:'7조'},
+    {t:'000100',n:'유한양행',p:78000,m:72000,sec:'바이오',mc:9,mcs:'9조'},
+    {t:'096770',n:'SK이노베이션',p:98000,m:105000,sec:'화학',mc:9,mcs:'9조'},
+    {t:'138930',n:'BNK금융지주',p:9800,m:9200,sec:'금융',mc:5,mcs:'5조'},
+    {t:'011170',n:'롯데케미칼',p:78000,m:82000,sec:'화학',mc:8,mcs:'8조'},
+    {t:'000720',n:'현대건설',p:42000,m:48000,sec:'건설',mc:8,mcs:'8조'},
+    {t:'139480',n:'이마트',p:62000,m:58000,sec:'유통',mc:9,mcs:'9조'},
+  ]
+};
+
+const GRADES=[
+  {key:5,label:'★★★★★ 적극 매수',cls:'b5',short:'적극매수',desc:'월봉 MA10 직상단 구간으로 손절 기준이 명확하며 리스크 대비 수익 구조가 가장 유리합니다.',newBuy:'50~100% 진입',hold:'추가 매수 고려'},
+  {key:4,label:'★★★★ 매수',cls:'b4',short:'매수',desc:'추세는 강하나 이평선까지 낙폭이 있으므로 분할 진입을 권장합니다.',newBuy:'30~50% 분할 진입',hold:'보유 유지'},
+  {key:3,label:'★★★ 보유/관망',cls:'b3',short:'보유/관망',desc:'월봉 기준 조정 확률이 높아지는 과열 구간입니다.',newBuy:'신규 진입 자제',hold:'차익실현 고려'},
+  {key:2,label:'★★ 주의/관망',cls:'b2',short:'주의/관망',desc:'MA10 직하단 5% 이내 회색지대입니다. 이탈 여부 확인 후 판단하세요.',newBuy:'진입 대기',hold:'손절선 재점검'},
+  {key:1,label:'★ 매도',cls:'b1',short:'매도',desc:'이평선이 저항선으로 전환된 명확한 하락 추세 구간입니다.',newBuy:'진입 금지',hold:'분할 매도'},
+  {key:0,label:'☆ 강력 매도',cls:'b0',short:'강력매도',desc:'급락 구간으로 추가 하락 위험이 높습니다.',newBuy:'진입 금지',hold:'즉시 손절'},
+];
+
+let S={page:'stocks',mkt:'us',filter:null,sortKey:'gap',sortDir:'desc',thKey:null,thDir:'desc',
+  detailTicker:null,detailMkt:'us',hmMkt:'us',hmMode:'ratio',hmSec:null,drillSort:'gap-desc',guideTab:'intro'};
+let AUTH={user:null,favs:new Set()};
+let dChart=null,hmChart=null;
+
+const cg=(p,m)=>((p-m)/m)*100;
+function getGrade(g){
+  if(g>=0&&g<=15)return GRADES[0];if(g>15&&g<=30)return GRADES[1];if(g>30)return GRADES[2];
+  if(g>=-5&&g<0)return GRADES[3];if(g>=-20&&g<-5)return GRADES[4];return GRADES[5];
+}
+function hmColor(v,mode){
+  if(mode==='ratio'){if(v>=.8)return'#1D9E75';if(v>=.6)return'#9FE1CB';if(v>=.4)return'#FAC775';if(v>=.2)return'#F0997B';return'#E24B4A';}
+  if(v>=15)return'#1D9E75';if(v>=5)return'#9FE1CB';if(v>=-5)return'#FAC775';if(v>=-15)return'#F0997B';return'#E24B4A';
+}
+const fp=(p,kr)=>kr?p.toLocaleString()+'원':'$'+p.toLocaleString();
+const fg=(g)=>(g>=0?'+':'')+g.toFixed(1)+'%';
+const gc=(g)=>g>=0?(g<5?'gwarn':'gpos'):'gneg';
+function allS(){return[...ALL.us,...ALL.kr];}
+function findStock(t){return allS().find(s=>s.t===t);}
+function isFav(t){return AUTH.favs.has(t);}
+function stockCell(s,isKr){
+  if(isKr)return`<div class="kr-nm">${s.n}</div><div class="kr-cd">${s.t}</div>`;
+  return`<div class="us-tkr">${s.t}</div><div class="us-nm">${s.n}</div>`;
+}
+
+function showToast(msg,type='info',dur=3000){
+  const wrap=document.getElementById('toast-wrap');
+  const id='t'+Date.now();
+  const el=document.createElement('div');
+  el.className=`toast ${type}`;el.id=id;el.textContent=msg;
+  wrap.appendChild(el);
+  setTimeout(()=>{const e=document.getElementById(id);if(e)e.remove();},dur);
+}
+
+function favBtnHTML(t,big=false){
+  const sz=big?'font-size:24px':'';
+  if(!AUTH.user)return`<button class="fav-btn locked" style="${sz}" onclick="event.stopPropagation();openModal('login')" title="로그인 후 이용">☆</button>`;
+  const fav=isFav(t);
+  return`<button class="fav-btn${fav?' active':''}" style="${sz}" onclick="event.stopPropagation();doToggleFav('${t}')">${fav?'★':'☆'}</button>`;
+}
+
+/* ── AUTH MODAL ── */
+function openModal(tab){
+  const wrap=document.getElementById('auth-modal-wrap');
+  const isLogin=tab==='login';
+  wrap.innerHTML=`<div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-title">MA<span style="color:#1D9E75">10</span> Signal</div>
+    <div class="modal-sub">${isLogin?'로그인하고 즐겨찾기를 이용하세요':'계정을 만들어 즐겨찾기를 저장하세요'}</div>
+    <div class="modal-tabs">
+      <button class="modal-tab${isLogin?' on':''}" onclick="openModal('login')">로그인</button>
+      <button class="modal-tab${!isLogin?' on':''}" onclick="openModal('signup')">회원가입</button>
+    </div>
+    ${isLogin?`
+    <div class="form-group"><label class="form-label">이메일</label>
+      <input class="form-input" id="f-email" type="email" placeholder="이메일 입력" autocomplete="email">
+      <div class="form-error" id="e-email"></div></div>
+    <div class="form-group"><label class="form-label">비밀번호</label>
+      <input class="form-input" id="f-pw" type="password" placeholder="비밀번호 입력" autocomplete="current-password">
+      <div class="form-error" id="e-pw"></div></div>
+    <div class="form-error" id="e-global" style="text-align:center;margin-bottom:8px"></div>
+    <button class="form-submit" id="f-submit" onclick="doLogin()">로그인</button>
+    <div class="form-hint" style="margin-top:1rem">계정이 없으신가요? <span class="form-link" onclick="openModal('signup')">회원가입</span></div>
+    <div class="form-hint" style="margin-top:6px;color:var(--color-text-tertiary);font-size:10px">테스트: demo@ma10.com / demo1234</div>
+    `:`
+    <div class="form-group"><label class="form-label">이름</label>
+      <input class="form-input" id="f-name" type="text" placeholder="이름 입력" autocomplete="name">
+      <div class="form-error" id="e-name"></div></div>
+    <div class="form-group"><label class="form-label">이메일</label>
+      <input class="form-input" id="f-email" type="email" placeholder="이메일 입력" autocomplete="email">
+      <div class="form-error" id="e-email"></div></div>
+    <div class="form-group"><label class="form-label">비밀번호 <span style="font-size:10px;color:var(--color-text-tertiary)">(8자 이상)</span></label>
+      <input class="form-input" id="f-pw" type="password" placeholder="비밀번호 입력" autocomplete="new-password">
+      <div class="form-error" id="e-pw"></div></div>
+    <div class="form-group"><label class="form-label">비밀번호 확인</label>
+      <input class="form-input" id="f-pw2" type="password" placeholder="비밀번호 재입력" autocomplete="new-password">
+      <div class="form-error" id="e-pw2"></div></div>
+    <div class="form-error" id="e-global" style="text-align:center;margin-bottom:8px"></div>
+    <button class="form-submit" id="f-submit" onclick="doSignup()">가입하기</button>
+    <div class="form-hint" style="margin-top:1rem">이미 계정이 있으신가요? <span class="form-link" onclick="openModal('login')">로그인</span></div>
+    `}
+  </div></div>`;
+  setTimeout(()=>{const el=document.getElementById('f-email');if(el)el.focus();},50);
+  document.querySelectorAll('.form-input').forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter'){const b=document.getElementById('f-submit');if(b)b.click();}}));
+}
+function closeModal(){document.getElementById('auth-modal-wrap').innerHTML='';}
+
+async function doLogin(){
+  const email=(document.getElementById('f-email')?.value||'').trim();
+  const pw=document.getElementById('f-pw')?.value||'';
+  let ok=true;
+  if(!email){document.getElementById('e-email').textContent='이메일을 입력하세요';ok=false;}
+  if(!pw){document.getElementById('e-pw').textContent='비밀번호를 입력하세요';ok=false;}
+  if(!ok)return;
+  const btn=document.getElementById('f-submit');btn.disabled=true;btn.textContent='로그인 중...';
+  try{
+    const data=await apiLogin(email,pw);
+    AUTH.user=data.user;
+    const favList=await apiGetFavs(email);
+    AUTH.favs=new Set(favList);
+    closeModal();renderAuthArea();renderPNav();
+    showToast(`${AUTH.user.name}님, 환영합니다!`,'success');
+    if(S.page==='mypage')renderMyPage();
+    if(S.page==='stocks')renderStocksTable();
+  }catch(e){
+    document.getElementById('e-global').textContent=e.message;
+    btn.disabled=false;btn.textContent='로그인';
+  }
+}
+
+async function doSignup(){
+  const name=(document.getElementById('f-name')?.value||'').trim();
+  const email=(document.getElementById('f-email')?.value||'').trim();
+  const pw=document.getElementById('f-pw')?.value||'';
+  const pw2=document.getElementById('f-pw2')?.value||'';
+  let ok=true;
+  if(!name){document.getElementById('e-name').textContent='이름을 입력하세요';ok=false;}
+  if(!email||!/\S+@\S+\.\S+/.test(email)){document.getElementById('e-email').textContent='올바른 이메일을 입력하세요';ok=false;}
+  if(pw.length<8){document.getElementById('e-pw').textContent='비밀번호는 8자 이상이어야 합니다';ok=false;}
+  if(pw!==pw2){document.getElementById('e-pw2').textContent='비밀번호가 일치하지 않습니다';ok=false;}
+  if(!ok)return;
+  const btn=document.getElementById('f-submit');btn.disabled=true;btn.textContent='가입 중...';
+  try{
+    await apiSignup(email,pw,name);
+    const data=await apiLogin(email,pw);
+    AUTH.user=data.user;AUTH.favs=new Set();
+    closeModal();renderAuthArea();renderPNav();
+    showToast('가입 완료! 환영합니다 '+name+'님','success');
+    if(S.page==='mypage')renderMyPage();
+  }catch(e){
+    document.getElementById('e-global').textContent=e.message;
+    btn.disabled=false;btn.textContent='가입하기';
+  }
+}
+
+async function doLogout(){
+  await apiLogout();
+  AUTH.user=null;AUTH.favs=new Set();
+  renderAuthArea();renderPNav();
+  showToast('로그아웃되었습니다','info');
+  if(S.page==='mypage')renderMyPage();
+  if(S.page==='stocks')renderStocksTable();
+  if(S.page==='detail')renderDetail();
+}
+
+function renderAuthArea(){
+  const area=document.getElementById('auth-area');
+  if(AUTH.user){
+    const initials=AUTH.user.name.slice(0,1);
+    area.innerHTML=`<div class="user-chip">
+      <div class="user-avatar">${initials}</div>
+      <span style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${AUTH.user.name}</span>
+      <button class="auth-btn" onclick="doLogout()">로그아웃</button>
+    </div>`;
+  }else{
+    area.innerHTML=`<div style="display:flex;gap:6px">
+      <button class="auth-btn" onclick="openModal('login')">로그인</button>
+      <button class="auth-btn primary" onclick="openModal('signup')">회원가입</button>
+    </div>`;
+  }
+}
+
+async function doToggleFav(t){
+  if(!AUTH.user){openModal('login');return;}
+  if(isFav(t)){await apiRemoveFav(AUTH.user.email,t);AUTH.favs.delete(t);}
+  else{await apiAddFav(AUTH.user.email,t);AUTH.favs.add(t);}
+  renderPNav();
+  if(S.page==='stocks')renderStocksTable();
+  if(S.page==='detail')renderDetail();
+  if(S.page==='mypage')renderMyPage();
+  if(S.page==='heatmap')renderDrill();
+}
+
+/* ── NAVIGATION ── */
+function nav(page,sub){
+  S.page=page;
+  if(page==='stocks'&&sub)S.mkt=sub;
+  if(page==='detail'&&sub)S.detailTicker=sub;
+  if(page==='heatmap'&&sub)S.hmSec=sub;
+  if(page==='guide')S.guideTab=sub||S.guideTab||'intro';
+  render();window.scrollTo(0,0);
+}
+function render(){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('page-'+S.page).classList.add('on');
+  renderPNav();renderSNav();renderBC();
+  if(S.page==='stocks')renderStocks();
+  if(S.page==='detail')renderDetail();
+  if(S.page==='heatmap')renderHeatmap();
+  if(S.page==='mypage')renderMyPage();
+  if(S.page==='guide')renderGuide();
+}
+function renderPNav(){
+  ['stocks','heatmap','mypage','guide'].forEach(id=>{
+    const el=document.getElementById('pnav-'+id);
+    if(el)el.classList.toggle('on',S.page===id||(S.page==='detail'&&id==='stocks'));
+  });
+  const mp=document.getElementById('pnav-mypage');
+  if(mp){const cnt=AUTH.favs.size;mp.textContent=cnt>0?`마이 페이지 (${cnt})`:'마이 페이지';}
+}
+function renderSNav(){
+  const el=document.getElementById('nav-sec');
+  if(S.page==='stocks'||S.page==='detail'){
+    el.classList.remove('hidden');
+    el.innerHTML=`<button class="nsb${S.mkt==='us'?' on':''}" onclick="nav('stocks','us')">🇺🇸 미국</button>
+      <button class="nsb${S.mkt==='kr'?' on':''}" onclick="nav('stocks','kr')">🇰🇷 한국</button>`;
+  }else if(S.page==='guide'){
+    el.classList.remove('hidden');
+    el.innerHTML=`<button class="nsb${S.guideTab==='intro'?' on':''}" onclick="switchGuide('intro')">전략 소개</button>
+      <button class="nsb${S.guideTab==='grade'?' on':''}" onclick="switchGuide('grade')">등급 체계</button>
+      <button class="nsb${S.guideTab==='faq'?' on':''}" onclick="switchGuide('faq')">FAQ</button>`;
+  }else{el.classList.add('hidden');}
+}
+function renderBC(){
+  const el=document.getElementById('bc');
+  if(S.page!=='detail'){el.innerHTML='';return;}
+  const s=findStock(S.detailTicker);
+  const label=S.detailMkt==='kr'?(s?s.n:S.detailTicker):S.detailTicker;
+  el.innerHTML=`<span class="bci" onclick="nav('stocks','${S.detailMkt}')">주식 종목</span><span class="bcs">›</span><span class="bcc">${label}</span>`;
+}
+
+/* ── STOCKS ── */
+function renderStocks(){
+  const stocks=ALL[S.mkt];
+  const cnts=[0,0,0,0,0,0];
+  stocks.forEach(s=>cnts[5-getGrade(cg(s.p,s.m)).key]++);
+  const lbls=['적극매수','매수','보유/관망','주의/관망','매도','강력매도'];
+  const cls=['cvg','cvg','cva','cva','cvr','cvr'];
+  document.getElementById('dash-stats').innerHTML=lbls.map((l,i)=>`<div class="sc"><div class="sc-l">${l}</div><div class="sc-v ${cls[i]}">${cnts[i]}</div></div>`).join('');
+  const gpm=[['★★★★★ 적극 매수','gp5'],['★★★★ 매수','gp4'],['★★★ 보유/관망','gp3'],['★★ 주의/관망','gp2'],['★ 매도','gp1'],['☆ 강력 매도','gp0']];
+  document.getElementById('grade-filter').innerHTML='<span style="font-size:11px;color:var(--color-text-secondary);margin-right:2px">등급:</span>'+
+    gpm.map((g,i)=>`<span class="pill ${g[1]}${S.filter===i?' on':''}" onclick="setFilter(${i})">${g[0]} (${cnts[i]})</span>`).join('');
+  renderStocksTable();
+  ['gap','price','ma10','name'].forEach(k=>{const a=document.getElementById('arr-'+k);if(a){a.textContent='';a.parentElement.classList.remove('sorted');}});
+  const sk=S.thKey||S.sortKey;const a=document.getElementById('arr-'+sk);
+  if(a){a.textContent=(S.thKey?S.thDir:S.sortDir)==='desc'?'▼':'▲';a.parentElement.classList.add('sorted');}
+  document.querySelectorAll('[id^="sb-"]').forEach(b=>b.classList.remove('on'));
+  if(!S.thKey&&S.sortKey){const sb=document.getElementById('sb-'+S.sortKey+'-'+S.sortDir);if(sb)sb.classList.add('on');}
+}
+function renderStocksTable(){
+  const isKr=S.mkt==='kr';
+  let rows=ALL[S.mkt].map(s=>({...s,gap:cg(s.p,s.m)}));
+  if(S.filter!==null)rows=rows.filter(s=>getGrade(s.gap).key===5-S.filter);
+  const sk=S.thKey||S.sortKey,sd=S.thKey?S.thDir:S.sortDir;
+  rows.sort((a,b)=>{
+    if(sk==='gap'||sk==='grade')return sd==='desc'?b.gap-a.gap:a.gap-b.gap;
+    if(sk==='price')return sd==='desc'?b.p-a.p:a.p-b.p;
+    if(sk==='ma10')return sd==='desc'?b.m-a.m:a.m-b.m;
+    return sd==='asc'?a.n.localeCompare(b.n):b.n.localeCompare(a.n);
+  });
+  document.getElementById('dash-tbody').innerHTML=rows.map(s=>{
+    const g=getGrade(s.gap);
+    return`<tr class="cl" onclick="openDetail('${s.t}','${S.mkt}')">
+      <td>${stockCell(s,isKr)}</td><td>${fp(s.p,isKr)}</td>
+      <td class="hide-mobile" style="color:var(--color-text-secondary)">${fp(s.m,isKr)}</td>
+      <td class="${gc(s.gap)}">${fg(s.gap)}</td>
+      <td><span class="bdg ${g.cls}">${g.label}</span></td>
+      <td class="hide-mobile"><span style="font-size:10px;color:var(--color-text-tertiary);background:var(--color-background-secondary);padding:1px 5px;border-radius:var(--border-radius-md)">${s.sec}</span></td>
+      <td style="text-align:center">${favBtnHTML(s.t)}</td>
+    </tr>`;
+  }).join('');
+}
+function openDetail(ticker,mkt){S.detailMkt=mkt;nav('detail',ticker);}
+function setFilter(i){S.filter=S.filter===i?null:i;renderStocks();}
+function setSort(k,d){S.sortKey=k;S.sortDir=d;S.thKey=null;renderStocksTable();document.querySelectorAll('[id^="sb-"]').forEach(b=>b.classList.remove('on'));const sb=document.getElementById('sb-'+k+'-'+d);if(sb)sb.classList.add('on');}
+function thSort(k){if(S.thKey===k)S.thDir=S.thDir==='asc'?'desc':'asc';else{S.thKey=k;S.thDir='desc';}S.sortKey=null;renderStocks();}
+function doSearch(){
+  const raw=document.getElementById('si').value.trim();const v=raw.toUpperCase();
+  const f=allS().find(s=>s.t===v||s.n.includes(raw));
+  if(f){const m=ALL.us.some(x=>x.t===f.t)?'us':'kr';openDetail(f.t,m);}
+}
+document.getElementById('si').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+
+/* ── DETAIL ── */
+function renderDetail(){
+  const s=findStock(S.detailTicker);if(!s)return;
+  const isKr=S.detailMkt==='kr';const gap=cg(s.p,s.m);const grade=getGrade(gap);
+  const mainLabel=isKr?s.n:s.t;const subLabel=isKr?s.t:s.n;
+  document.getElementById('d-ticker').textContent=mainLabel;
+  document.getElementById('d-sub').innerHTML=`<span style="font-size:11px;color:var(--color-text-tertiary)">${subLabel}</span><span style="color:var(--color-text-tertiary)">·</span><span>${s.sec} · ${s.mcs}</span><span class="sl" onclick="S.hmMkt='${S.detailMkt}';nav('heatmap','${s.sec}')">섹터 히트맵 →</span>`;
+  document.getElementById('d-fav-wrap').innerHTML=favBtnHTML(s.t,true);
+  const db=document.getElementById('d-badge');db.textContent=grade.label;db.className='bdg '+grade.cls;db.style.fontSize='13px';db.style.padding='4px 12px';
+  document.getElementById('d-stats').innerHTML=`
+    <div class="sc"><div class="sc-l">현재가</div><div class="sc-v">${fp(s.p,isKr)}</div></div>
+    <div class="sc"><div class="sc-l">MA10</div><div class="sc-v" style="color:var(--color-text-secondary)">${fp(s.m,isKr)}</div></div>
+    <div class="sc"><div class="sc-l">이격률</div><div class="sc-v ${gap>=0?'cvg':'cvr'}">${fg(gap)}</div></div>
+    <div class="sc"><div class="sc-l">등급</div><div class="sc-v" style="font-size:13px">${grade.short}</div></div>`;
+  const pct=Math.min(Math.max((gap+30)/60,0),1);
+  const fill=document.getElementById('gap-fill');fill.style.left='0';fill.style.width=(pct*100).toFixed(1)+'%';
+  fill.style.background=gap>=15?'#3B6D11':gap>=0?'#1D9E75':gap>=-5?'#BA7517':gap>=-20?'#D85A30':'#A32D2D';
+  document.getElementById('d-signal-card').innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="bdg ${grade.cls}" style="font-size:12px;padding:3px 10px">${grade.label}</span></div>
+    <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.7;margin-bottom:10px">${grade.desc}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="sc"><div class="sc-l">신규 매수자</div><div style="font-size:13px;font-weight:500;margin-top:2px;color:var(--color-text-primary)">${grade.newBuy}</div></div>
+      <div class="sc"><div class="sc-l">기존 보유자</div><div style="font-size:13px;font-weight:500;margin-top:2px;color:var(--color-text-primary)">${grade.hold}</div></div>
+    </div>`;
+  if(dChart){dChart.destroy();dChart=null;}
+  const months=['25.04','25.05','25.06','25.07','25.08','25.09','25.10','25.11','25.12','26.01','26.02','26.03'];
+  const gd=months.map((_,i)=>parseFloat((gap*((i+1)/12)+(Math.random()-0.5)*4*(1-(i/12))).toFixed(1)));gd[11]=parseFloat(gap.toFixed(1));
+  const ctx=document.getElementById('d-chart').getContext('2d');
+  dChart=new Chart(ctx,{type:'line',data:{labels:months,datasets:[{label:'이격률(%)',data:gd,borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.07)',borderWidth:2,pointRadius:2,tension:0.3,fill:true},{label:'기준선',data:months.map(()=>0),borderColor:'rgba(136,135,128,0.4)',borderWidth:1,borderDash:[4,3],pointRadius:0,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(136,135,128,0.12)'},ticks:{font:{size:10},callback:v=>(v>=0?'+':'')+v+'%'}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  const hist=genHist(s,gap,isKr);
+  document.getElementById('d-hist').innerHTML=hist.map(h=>{const chg=((s.p-h.price)/h.price*100);return`<tr><td>${h.date}</td><td><span class="bdg ${h.from.cls}" style="font-size:10px;padding:1px 4px">${h.from.short}</span>→<span class="bdg ${h.to.cls}" style="font-size:10px;padding:1px 4px">${h.to.short}</span></td><td>${fg(h.gap)}</td><td>${isKr?h.price.toLocaleString()+'원':'$'+h.price.toFixed(2)}<br><span class="${chg>=0?'gpos':'gneg'}" style="font-size:11px">${(chg>=0?'+':'')+chg.toFixed(1)}%</span></td></tr>`;}).join('');
+}
+function genHist(s,gap,isKr){
+  const seq=[1,2,3,2,3,4,5];const rows=[];let prev=GRADES[5-Math.min(Math.max(seq[0],0),5)];
+  for(let i=1;i<seq.length;i++){const g=GRADES[5-Math.min(Math.max(seq[i],0),5)];if(g.key!==prev.key){const ma=seq.length-i;const d=new Date(2026,2,22);d.setMonth(d.getMonth()-ma);rows.push({date:`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}`,from:prev,to:g,gap:parseFloat((gap-(gap*(ma*.08))).toFixed(1)),price:isKr?Math.round(s.p*(1-(ma*.04))):parseFloat((s.p*(1-(ma*.04))).toFixed(2))});}prev=g;}
+  return rows.reverse();
+}
+
+/* ── MY PAGE ── */
+function renderMyPage(){
+  const mp=document.getElementById('page-mypage');
+  if(!AUTH.user){
+    mp.innerHTML=`<div class="card" style="text-align:center;padding:2.5rem 1.5rem">
+      <div style="font-size:32px;margin-bottom:12px">⭐</div>
+      <div style="font-size:16px;font-weight:500;margin-bottom:6px;color:var(--color-text-primary)">로그인이 필요합니다</div>
+      <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1.25rem">로그인 후 즐겨찾기 종목을 저장하고<br>모든 기기에서 확인할 수 있습니다</div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button class="auth-btn" onclick="openModal('login')" style="padding:8px 20px;font-size:13px">로그인</button>
+        <button class="auth-btn primary" onclick="openModal('signup')" style="padding:8px 20px;font-size:13px">회원가입</button>
+      </div>
+    </div>`;
+    return;
+  }
+  const initials=AUTH.user.name.slice(0,1);
+  let favHtml='';
+  if(AUTH.favs.size===0){
+    favHtml=`<div style="text-align:center;padding:2.5rem 1rem;color:var(--color-text-secondary);font-size:13px">
+      <div style="font-size:15px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">즐겨찾기가 비어있어요</div>
+      종목 목록이나 상세 페이지에서 ★ 버튼을 눌러 추가하세요</div>`;
+  }else{
+    favHtml=[...AUTH.favs].map(t=>{
+      const s=findStock(t);if(!s)return'';
+      const isKr=ALL.kr.some(x=>x.t===t);
+      const gap=cg(s.p,s.m);const grade=getGrade(gap);
+      const name=isKr?s.n:s.t;const sub=isKr?s.t:s.n;
+      return`<div class="my-item">
+        <div class="my-item-left" onclick="openDetail('${t}','${isKr?'kr':'us'}')">
+          <div class="mi-main">${name}</div>
+          <div class="mi-sub">${sub} · ${s.sec} · ${s.mcs}</div>
+        </div>
+        <div class="my-item-right">
+          <span class="bdg ${grade.cls}">${grade.label}</span>
+          <span class="${gc(gap)}" style="font-size:13px;font-weight:500;min-width:48px;text-align:right">${fg(gap)}</span>
+          <button class="del-btn" onclick="doToggleFav('${t}')">×</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  mp.innerHTML=`
+    <div class="card" style="margin-bottom:.75rem">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:40px;height:40px;border-radius:50%;background:#E1F5EE;color:#085041;font-size:16px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0">${initials}</div>
+        <div><div style="font-size:15px;font-weight:500;color:var(--color-text-primary)">${AUTH.user.name}</div>
+        <div style="font-size:12px;color:var(--color-text-secondary)">${AUTH.user.email}</div></div>
+        <button class="auth-btn" onclick="doLogout()" style="margin-left:auto">로그아웃</button>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${AUTH.favs.size>0?'12px':'0'}">
+        <div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">즐겨찾기 종목</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:2px 9px;border-radius:20px;border:.5px solid var(--color-border-tertiary)">${AUTH.favs.size}개</div>
+      </div>
+      ${favHtml}
+    </div>`;
+}
+
+/* ── HEATMAP ── */
+function getSectors(mkt){
+  const map={};ALL[mkt].forEach(s=>{if(!map[s.sec])map[s.sec]={name:s.sec,total:0,above:0,gs:0};map[s.sec].total++;const g=cg(s.p,s.m);if(g>=0)map[s.sec].above++;map[s.sec].gs+=g;});
+  return Object.values(map).map(s=>({...s,avgGap:parseFloat((s.gs/s.total).toFixed(1))}));
+}
+function renderHeatmap(){
+  document.querySelectorAll('#hm-mkt-seg .seg-btn').forEach((b,i)=>b.classList.toggle('on',i===(S.hmMkt==='us'?0:1)));
+  document.querySelectorAll('#hm-mode-seg .seg-btn').forEach((b,i)=>b.classList.toggle('on',i===(S.hmMode==='ratio'?0:1)));
+  const secs=getSectors(S.hmMkt);
+  let ab=0,be=0,gs2=0;secs.forEach(s=>{ab+=s.above;be+=(s.total-s.above);gs2+=s.avgGap;});
+  const rat=Math.round(ab/(ab+be)*100);const avgG=(gs2/secs.length).toFixed(1);
+  const trend=rat>60?'강세':rat>40?'중립':'약세';const tc=rat>60?'cvg':rat>40?'cva':'cvr';
+  document.getElementById('hm-summary').innerHTML=`
+    <div class="sc"><div class="sc-l">시장 강도</div><div class="sc-v ${tc}">${trend}</div></div>
+    <div class="sc"><div class="sc-l">MA10 위</div><div class="sc-v cvg">${ab}개</div></div>
+    <div class="sc"><div class="sc-l">MA10 아래</div><div class="sc-v cvr">${be}개</div></div>
+    <div class="sc"><div class="sc-l">평균 이격률</div><div class="sc-v ${parseFloat(avgG)>=0?'cvg':'cvr'}">${parseFloat(avgG)>=0?'+':''}${avgG}%</div></div>`;
+  document.getElementById('hm-grid').innerHTML=secs.map(s=>{
+    const ratio=s.above/s.total;const dv=S.hmMode==='ratio'?ratio:s.avgGap;const bg=hmColor(dv,S.hmMode);
+    const ap=Math.round(ratio*100);const mv=S.hmMode==='ratio'?ap+'%':((s.avgGap>=0?'+':'')+s.avgGap.toFixed(1)+'%');
+    const sel=S.hmSec===s.name;
+    return`<div class="hmc${sel?' sel':''}" style="border-left-color:${bg}" onclick="toggleDrill('${s.name}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">${s.name}</div>
+        <div style="font-size:11px;color:var(--color-text-secondary)">${s.total} ${sel?'▲':'▼'}</div>
+      </div>
+      <div class="bt"><div class="bf" style="width:${ap}%;background:${bg}"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px">
+        <span style="font-size:12px;font-weight:500;color:${ratio>=.5?'#0F6E56':'#A32D2D'}">${mv}</span>
+        <span style="color:var(--color-text-secondary)">${s.above}↑${s.total-s.above}↓</span>
+      </div>
+    </div>`;
+  }).join('');
+  renderDrill();
+  if(hmChart)hmChart.destroy();
+  const ctx=document.getElementById('hm-chart').getContext('2d');
+  hmChart=new Chart(ctx,{type:'bar',data:{labels:secs.map(s=>s.name),datasets:[{label:'MA10 위',data:secs.map(s=>s.above),backgroundColor:'#1D9E75',borderRadius:2},{label:'MA10 아래',data:secs.map(s=>s.total-s.above),backgroundColor:'#F09595',borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10},autoSkip:false,maxRotation:35}},y:{stacked:true,grid:{color:'rgba(136,135,128,0.12)'},ticks:{font:{size:10},stepSize:1}}}}});
+}
+function toggleDrill(name){S.hmSec=S.hmSec===name?null:name;renderHeatmap();if(S.hmSec)setTimeout(()=>{const p=document.getElementById('drill-panel');if(p)p.scrollIntoView({behavior:'smooth',block:'nearest'});},50);}
+function renderDrill(){
+  const panel=document.getElementById('drill-panel');if(!S.hmSec){panel.innerHTML='';return;}
+  const isKr=S.hmMkt==='kr';
+  let stocks=ALL[S.hmMkt].filter(s=>s.sec===S.hmSec).map(s=>({...s,gap:cg(s.p,s.m)}));
+  const maxMc=Math.max(...stocks.map(s=>s.mc));
+  if(S.drillSort==='gap-desc')stocks.sort((a,b)=>b.gap-a.gap);else if(S.drillSort==='gap-asc')stocks.sort((a,b)=>a.gap-b.gap);else stocks.sort((a,b)=>b.mc-a.mc);
+  const ab=stocks.filter(s=>s.gap>=0).length;const avgGap=(stocks.reduce((a,s)=>a+s.gap,0)/stocks.length).toFixed(1);
+  panel.innerHTML=`<div class="dr"><div class="drh">
+    <div style="display:flex;align-items:center;gap:8px"><div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">${S.hmSec} 섹터</div><div style="font-size:12px;color:var(--color-text-secondary)">${stocks.length}종목</div></div>
+    <button onclick="toggleDrill('${S.hmSec}')" style="font-size:18px;color:var(--color-text-tertiary);cursor:pointer;border:none;background:none;line-height:1;padding:2px 4px">×</button>
+  </div>
+  <div class="drs">
+    <div class="drs-i"><div class="drs-l">MA10 위</div><div class="drs-v cvg">${ab}개</div></div>
+    <div class="drs-i"><div class="drs-l">MA10 아래</div><div class="drs-v cvr">${stocks.length-ab}개</div></div>
+    <div class="drs-i"><div class="drs-l">평균 이격률</div><div class="drs-v ${parseFloat(avgGap)>=0?'cvg':'cvr'}">${parseFloat(avgGap)>=0?'+':''}${avgGap}%</div></div>
+    <div class="drs-i"><div class="drs-l">위 비율</div><div class="drs-v ${ab/stocks.length>=.5?'cvg':'cvr'}">${Math.round(ab/stocks.length*100)}%</div></div>
+  </div>
+  <div style="display:flex;gap:5px;padding:7px 12px;border-bottom:.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);flex-wrap:wrap;align-items:center">
+    <span style="font-size:11px;color:var(--color-text-secondary)">정렬:</span>
+    <button class="pill${S.drillSort==='gap-desc'?' on gp5':''}" onclick="S.drillSort='gap-desc';renderDrill()">이격률 높은순</button>
+    <button class="pill${S.drillSort==='gap-asc'?' on gp1':''}" onclick="S.drillSort='gap-asc';renderDrill()">낮은순</button>
+    <button class="pill${S.drillSort==='mc-desc'?' on':''}" onclick="S.drillSort='mc-desc';renderDrill()">시총순</button>
+  </div>
+  <table><thead><tr>
+    <th style="width:26%">종목</th><th style="width:17%">현재가</th><th style="width:13%">이격률</th><th style="width:22%">신호 등급</th><th style="width:14%" class="hide-mobile">시총</th><th style="width:8%;text-align:center">★</th>
+  </tr></thead><tbody>${stocks.map(s=>{const g=getGrade(s.gap);return`<tr class="cl" onclick="openDetail('${s.t}','${S.hmMkt}')">
+    <td>${stockCell(s,isKr)}</td><td>${fp(s.p,isKr)}</td>
+    <td class="${gc(s.gap)}">${fg(s.gap)}</td><td><span class="bdg ${g.cls}">${g.label}</span></td>
+    <td class="hide-mobile"><div style="font-size:11px;color:var(--color-text-secondary)">${s.mcs}</div><div class="mkb" style="width:${Math.round((s.mc/maxMc)*80)}%"></div></td>
+    <td style="text-align:center">${favBtnHTML(s.t)}</td>
+  </tr>`;}).join('')}</tbody></table></div>`;
+}
+function setHmMkt(m){S.hmMkt=m;S.hmSec=null;renderHeatmap();}
+function setHmMode(m){S.hmMode=m;renderHeatmap();}
+
+/* ── GUIDE ── */
+function renderGuide(){
+  document.querySelectorAll('.guide-section').forEach(s=>s.style.display='none');
+  const el=document.getElementById('guide-'+S.guideTab);if(el)el.style.display='block';
+  if(S.guideTab==='faq')renderFAQ();renderSNav();
+}
+function switchGuide(tab){S.guideTab=tab;renderGuide();}
+const FAQS=[
+  {q:'데이터는 하루에 몇 번 갱신되나요?',a:'매일 오전 10시, 오후 12시, 3시, 6시, 9시, 자정 — 총 6회 갱신됩니다.'},
+  {q:'즐겨찾기는 어떻게 저장되나요?',a:'회원가입 후 로그인하면 즐겨찾기가 서버에 저장되어 어떤 기기에서 로그인해도 동일하게 이용할 수 있습니다.'},
+  {q:'MA10이 많이 오른 종목도 매수해야 하나요?',a:'이격률 +30% 초과 보유/관망 등급 종목은 신규 진입을 자제하는 것이 원칙입니다.'},
+  {q:'코스닥 종목도 같은 기준을 적용하나요?',a:'코스닥처럼 변동성이 큰 시장은 주의 구간을 ±7%로 넓히는 방식으로 미세 조정할 수 있습니다.'},
+  {q:'시가총액 Top 500 외 종목도 검색할 수 있나요?',a:'상단 검색창에 티커 또는 종목명을 입력하면 MA10 분석 결과를 확인할 수 있습니다.'},
+];
+function renderFAQ(){
+  const el=document.getElementById('faq-list');if(!el)return;
+  el.innerHTML=FAQS.map((f,i)=>`<div class="fqi"><button class="fqq" onclick="tFAQ(${i})"><span>${f.q}</span><span class="fqa-arrow" id="fa-${i}">▼</span></button><div class="fqa" id="faq-a-${i}">${f.a}</div></div>`).join('');
+}
+function tFAQ(i){const a=document.getElementById('faq-a-'+i),ar=document.getElementById('fa-'+i);ar.style.transform=a.classList.toggle('open')?'rotate(180deg)':'rotate(0deg)';}
+
+/* ── TIMER ── */
+const UT=[10,12,15,18,21,24];
+function getLN(){const now=new Date();const h=now.getHours()+(now.getMinutes()/60);let l=null,n=null;for(const t of UT){if(h>=t)l=t;else if(n===null)n=t;}if(n===null)n=UT[0];if(l===null)l=UT[UT.length-1];return{l,n};}
+function fH(h){const hh=h===24?0:h;return hh===0?'자정':((h<12?'오전':'오후')+' '+String(h===12||h===24?12:h%12).padStart(2,'0')+':00');}
+function updateTimer(){
+  const now=new Date();const{l,n}=getLN();
+  document.getElementById('last-update').textContent='갱신: '+fH(l);
+  const nh=n===24?0:n;const tg=new Date(now);tg.setHours(nh,0,0,0);if(tg<=now)tg.setDate(tg.getDate()+1);
+  const diff=Math.max(0,Math.floor((tg-now)/1000));const hh=Math.floor(diff/3600),mm=Math.floor((diff%3600)/60),ss=diff%60;
+  document.getElementById('timer').textContent=(hh>0?hh+'시간 ':'')+mm+'분 '+String(ss).padStart(2,'0')+'초';
+}
+
+renderAuthArea();render();updateTimer();setInterval(updateTimer,1000);
+</script>
+</body>
+</html>
