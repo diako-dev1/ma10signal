@@ -367,7 +367,7 @@
    ★ SUPABASE API LAYER
    아래 두 줄을 Supabase 프로젝트의 실제 값으로 교체하세요.
    ════════════════════════════════════════ */
-const SUPABASE_URL = 'https://ipcmifczwiuwxsokxmbt.supabase.co';
+const SUPABASE_URL = 'https://ipcmifczwiuwxsokxmbt.supabase.co'; // ← 교체 필요
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlwY21pZmN6d2l1d3hzb2t4bWJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNzQyNzAsImV4cCI6MjA4OTc1MDI3MH0.WYpcT-pmZMb2rYUDtGVD6Tv0MjcEQWCBcKNFLOEk8m8';
 /* ════════════════════════════════════════ */
 
@@ -391,8 +391,18 @@ async function apiSignup(email, password, name) {
   });
   const data = await res.json();
   if (!res.ok) {
-    if (data.msg && data.msg.includes('already')) throw new Error('이미 사용 중인 이메일입니다.');
-    throw new Error(data.msg || data.error_description || '가입에 실패했습니다.');
+    const msg = data.msg || data.error_description || data.message || '';
+    if (msg.toLowerCase().includes('already') || msg.toLowerCase().includes('registered')) {
+      throw new Error('이미 사용 중인 이메일입니다.');
+    }
+    if (msg.toLowerCase().includes('password')) {
+      throw new Error('비밀번호가 너무 짧거나 형식이 올바르지 않습니다.');
+    }
+    throw new Error(msg || '회원가입에 실패했습니다. 잠시 후 다시 시도해주세요.');
+  }
+  /* 가입 성공 — Supabase가 이메일 확인을 요구하는 경우 user.identities가 비어있음 */
+  if (data.user && data.user.identities && data.user.identities.length === 0) {
+    throw new Error('이미 사용 중인 이메일입니다.');
   }
   return { ok: true };
 }
@@ -403,7 +413,14 @@ async function apiLogin(email, password) {
     body: JSON.stringify({ email, password })
   });
   const data = await res.json();
-  if (!res.ok) throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
+  if (!res.ok) {
+    const data2 = await res.json().catch(()=>({}));
+    const msg = data2.error_description || data2.msg || data2.message || '';
+    if (msg.toLowerCase().includes('email') && msg.toLowerCase().includes('confirm')) {
+      throw new Error('이메일 인증이 필요합니다. 가입 시 받은 메일을 확인해주세요.');
+    }
+    throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
+  }
   localStorage.setItem('ma10_sb_token', data.access_token);
   localStorage.setItem('ma10_sb_refresh', data.refresh_token);
   const name = data.user?.user_metadata?.name || email.split('@')[0];
@@ -662,11 +679,17 @@ async function doSignup(){
   const btn=document.getElementById('f-submit');btn.disabled=true;btn.textContent='가입 중...';
   try{
     await apiSignup(email,pw,name);
-    const data=await apiLogin(email,pw);
-    AUTH.user=data.user;AUTH.favs=new Set();
-    closeModal();renderAuthArea();renderPNav();
-    showToast('가입 완료! 환영합니다 '+name+'님','success');
-    if(S.page==='mypage')renderMyPage();
+    try {
+      const data=await apiLogin(email,pw);
+      AUTH.user=data.user;AUTH.favs=new Set();
+      closeModal();renderAuthArea();renderPNav();
+      showToast('가입 완료! 환영합니다 '+name+'님 🎉','success');
+      if(S.page==='mypage')renderMyPage();
+    } catch(loginErr) {
+      /* 이메일 인증이 필요한 경우 — 가입은 성공했으나 로그인 전 인증 필요 */
+      closeModal();
+      showToast('가입 완료! 이메일 받은편지함에서 인증 링크를 클릭해주세요.','info',8000);
+    }
   }catch(e){
     document.getElementById('e-global').textContent=e.message;
     btn.disabled=false;btn.textContent='가입하기';
