@@ -367,8 +367,8 @@
    ★ SUPABASE API LAYER
    아래 두 줄을 Supabase 프로젝트의 실제 값으로 교체하세요.
    ════════════════════════════════════════ */
-const SUPABASE_URL = 'https://ipcmifczwiuwxsokxmbt.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlwY21pZmN6d2l1d3hzb2t4bWJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNzQyNzAsImV4cCI6MjA4OTc1MDI3MH0.WYpcT-pmZMb2rYUDtGVD6Tv0MjcEQWCBcKNFLOEk8m8';
+const SUPABASE_URL = 'https://ipcmifczwiuwxsokxmbt.supabase.co'; // ← 교체 필요
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlwY21pZmN6d2l1d3hzb2t4bWJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNzQyNzAsImV4cCI6MjA4OTc1MDI3MH0.WYpcT-pmZMb2rYUDtGVD6Tv0MjcEQWCBcKNFLOEk8m8'; // ← 교체 필요
 /* ════════════════════════════════════════ */
 
 /* Supabase 경량 클라이언트 (CDN SDK 불필요 — fetch 직접 호출) */
@@ -505,73 +505,63 @@ async function restoreSession() {
   } catch(e) { localStorage.removeItem('ma10_sb_token'); }
 }
 
-/* ── DATA (TODO: 실서비스에서 API로 교체) ── */
-const ALL={
-  us:[
-    {t:'AAPL',n:'Apple Inc.',p:213.5,m:198.2,sec:'기술',mc:3300,mcs:'$3.3조'},
-    {t:'MSFT',n:'Microsoft Corp.',p:415.8,m:388.4,sec:'기술',mc:3100,mcs:'$3.1조'},
-    {t:'NVDA',n:'NVIDIA Corp.',p:875.4,m:812.3,sec:'반도체',mc:2200,mcs:'$2.2조'},
-    {t:'GOOGL',n:'Alphabet Inc.',p:172.4,m:175.5,sec:'기술',mc:2100,mcs:'$2.1조'},
-    {t:'AMZN',n:'Amazon.com',p:195.2,m:191.8,sec:'이커머스',mc:2000,mcs:'$2.0조'},
-    {t:'META',n:'Meta Platforms',p:530.1,m:490.6,sec:'소셜미디어',mc:1400,mcs:'$1.4조'},
-    {t:'TSM',n:'TSMC',p:172.3,m:158.4,sec:'반도체',mc:893,mcs:'$893B'},
-    {t:'AVGO',n:'Broadcom Inc.',p:1642.0,m:1510.2,sec:'반도체',mc:768,mcs:'$768B'},
-    {t:'LLY',n:'Eli Lilly',p:785.2,m:920.5,sec:'제약',mc:745,mcs:'$745B'},
-    {t:'JPM',n:'JPMorgan Chase',p:224.7,m:210.3,sec:'금융',mc:648,mcs:'$648B'},
-    {t:'V',n:'Visa Inc.',p:276.5,m:266.8,sec:'금융',mc:569,mcs:'$569B'},
-    {t:'TSLA',n:'Tesla Inc.',p:248.3,m:295.1,sec:'전기차',mc:792,mcs:'$792B'},
-    {t:'MA',n:'Mastercard Inc.',p:492.3,m:468.1,sec:'금융',mc:457,mcs:'$457B'},
-    {t:'UNH',n:'UnitedHealth',p:512.4,m:498.2,sec:'헬스케어',mc:473,mcs:'$473B'},
-    {t:'XOM',n:'ExxonMobil',p:112.4,m:118.2,sec:'에너지',mc:448,mcs:'$448B'},
-    {t:'COST',n:'Costco Wholesale',p:892.3,m:848.4,sec:'소비재',mc:396,mcs:'$396B'},
-    {t:'BAC',n:'Bank of America',p:42.8,m:40.1,sec:'금융',mc:335,mcs:'$335B'},
-    {t:'MRK',n:'Merck & Co.',p:132.4,m:128.5,sec:'헬스케어',mc:335,mcs:'$335B'},
-    {t:'AMD',n:'Adv. Micro Dev.',p:178.5,m:162.3,sec:'반도체',mc:288,mcs:'$288B'},
-    {t:'WMT',n:'Walmart Inc.',p:92.4,m:85.2,sec:'소비재',mc:748,mcs:'$748B'},
-    {t:'HD',n:'Home Depot',p:412.4,m:385.2,sec:'소비재',mc:410,mcs:'$410B'},
-    {t:'QCOM',n:'Qualcomm',p:168.2,m:172.1,sec:'반도체',mc:187,mcs:'$187B'},
-    {t:'NOW',n:'ServiceNow',p:892.3,m:820.4,sec:'기술',mc:185,mcs:'$185B'},
-    {t:'GS',n:'Goldman Sachs',p:512.3,m:488.4,sec:'금융',mc:171,mcs:'$171B'},
-    {t:'TMO',n:'Thermo Fisher',p:592.3,m:568.4,sec:'헬스케어',mc:228,mcs:'$228B'},
-    {t:'ABBV',n:'AbbVie Inc.',p:178.4,m:172.1,sec:'헬스케어',mc:315,mcs:'$315B'},
-    {t:'CVX',n:'Chevron Corp.',p:148.4,m:158.2,sec:'에너지',mc:268,mcs:'$268B'},
-    {t:'CRM',n:'Salesforce',p:312.5,m:295.0,sec:'기술',mc:302,mcs:'$302B'},
-    {t:'ADBE',n:'Adobe Inc.',p:485.2,m:512.3,sec:'기술',mc:218,mcs:'$218B'},
-    {t:'ORCL',n:'Oracle Corp.',p:142.8,m:132.1,sec:'기술',mc:390,mcs:'$390B'},
-  ],
-  kr:[
-    {t:'005930',n:'삼성전자',p:62400,m:58100,sec:'반도체',mc:372,mcs:'372조'},
-    {t:'000660',n:'SK하이닉스',p:218000,m:198000,sec:'반도체',mc:158,mcs:'158조'},
-    {t:'005380',n:'현대차',p:213000,m:208000,sec:'자동차',mc:45,mcs:'45조'},
-    {t:'373220',n:'LG에너지솔루션',p:385000,m:402000,sec:'2차전지',mc:90,mcs:'90조'},
-    {t:'000270',n:'기아',p:98500,m:92300,sec:'자동차',mc:40,mcs:'40조'},
-    {t:'207940',n:'삼성바이오로직스',p:897000,m:845000,sec:'바이오',mc:63,mcs:'63조'},
-    {t:'105560',n:'KB금융',p:92000,m:85000,sec:'금융',mc:38,mcs:'38조'},
-    {t:'005490',n:'POSCO홀딩스',p:378000,m:412000,sec:'철강',mc:32,mcs:'32조'},
-    {t:'035420',n:'NAVER',p:182000,m:198000,sec:'IT플랫폼',mc:30,mcs:'30조'},
-    {t:'055550',n:'신한지주',p:58000,m:54000,sec:'금융',mc:28,mcs:'28조'},
-    {t:'003670',n:'포스코퓨처엠',p:248000,m:312000,sec:'2차전지',mc:28,mcs:'28조'},
-    {t:'068270',n:'셀트리온',p:162000,m:175000,sec:'바이오',mc:21,mcs:'21조'},
-    {t:'086790',n:'하나금융지주',p:68000,m:62000,sec:'금융',mc:20,mcs:'20조'},
-    {t:'051910',n:'LG화학',p:342000,m:338000,sec:'화학',mc:24,mcs:'24조'},
-    {t:'006400',n:'삼성SDI',p:312000,m:342000,sec:'2차전지',mc:21,mcs:'21조'},
-    {t:'035720',n:'카카오',p:38000,m:45000,sec:'IT플랫폼',mc:17,mcs:'17조'},
-    {t:'128940',n:'한미약품',p:312000,m:298000,sec:'바이오',mc:18,mcs:'18조'},
-    {t:'012330',n:'현대모비스',p:248000,m:232000,sec:'자동차',mc:23,mcs:'23조'},
-    {t:'316140',n:'우리금융지주',p:18000,m:16500,sec:'금융',mc:12,mcs:'12조'},
-    {t:'247540',n:'에코프로비엠',p:182000,m:212000,sec:'2차전지',mc:19,mcs:'19조'},
-    {t:'086520',n:'에코프로',p:92000,m:118000,sec:'2차전지',mc:12,mcs:'12조'},
-    {t:'058470',n:'리노공업',p:178000,m:165000,sec:'반도체',mc:22,mcs:'22조'},
-    {t:'042700',n:'한미반도체',p:92000,m:88000,sec:'반도체',mc:18,mcs:'18조'},
-    {t:'185750',n:'종근당',p:98000,m:112000,sec:'바이오',mc:7,mcs:'7조'},
-    {t:'000100',n:'유한양행',p:78000,m:72000,sec:'바이오',mc:9,mcs:'9조'},
-    {t:'096770',n:'SK이노베이션',p:98000,m:105000,sec:'화학',mc:9,mcs:'9조'},
-    {t:'138930',n:'BNK금융지주',p:9800,m:9200,sec:'금융',mc:5,mcs:'5조'},
-    {t:'011170',n:'롯데케미칼',p:78000,m:82000,sec:'화학',mc:8,mcs:'8조'},
-    {t:'000720',n:'현대건설',p:42000,m:48000,sec:'건설',mc:8,mcs:'8조'},
-    {t:'139480',n:'이마트',p:62000,m:58000,sec:'유통',mc:9,mcs:'9조'},
-  ]
-};
+/* ── DATA — Supabase DB에서 실시간 로드 ── */
+const ALL = { us: [], kr: [] };
+let dataLoaded = false;
+
+async function loadStocks() {
+  if (dataLoaded) return;
+  try {
+    showLoadingOverlay(true);
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/stocks?select=ticker,name,market,sector,price,ma10,gap_pct,market_cap_usd,market_cap_label&order=market_cap_usd.desc`,
+      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+    );
+    if (!res.ok) throw new Error('데이터 로드 실패');
+    const rows = await res.json();
+
+    ALL.us = [];
+    ALL.kr = [];
+    rows.forEach(r => {
+      const s = {
+        t: r.ticker,
+        n: r.name,
+        p: r.price || 0,
+        m: r.ma10 || 0,
+        sec: r.sector || '기타',
+        mc: r.market_cap_usd ? Math.round(r.market_cap_usd / 1e8) : 0,
+        mcs: r.market_cap_label || '-',
+      };
+      if (r.market === 'us') ALL.us.push(s);
+      else if (r.market === 'kr') ALL.kr.push(s);
+    });
+
+    dataLoaded = true;
+    console.log(`✅ 데이터 로드 완료: 미국 ${ALL.us.length}개, 한국 ${ALL.kr.length}개`);
+  } catch(e) {
+    console.error('데이터 로드 오류:', e);
+    showToast('데이터를 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.', 'error');
+  } finally {
+    showLoadingOverlay(false);
+  }
+}
+
+function showLoadingOverlay(show) {
+  let el = document.getElementById('loading-overlay');
+  if (show) {
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'loading-overlay';
+      el.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:9999';
+      el.innerHTML = '<div style="background:var(--color-background-primary);border-radius:var(--border-radius-lg);padding:2rem 3rem;text-align:center"><div style="font-size:16px;font-weight:500;color:var(--color-text-primary);margin-bottom:8px">데이터 로딩 중...</div><div style="font-size:13px;color:var(--color-text-secondary)">실시간 주가 데이터를 불러오고 있어요</div></div>';
+      document.body.appendChild(el);
+    }
+    el.style.display = 'flex';
+  } else {
+    if (el) el.style.display = 'none';
+  }
+}
+
 
 const GRADES=[
   {key:5,label:'★★★★★ 적극 매수',cls:'b5',short:'적극매수',desc:'월봉 MA10 직상단 구간으로 손절 기준이 명확하며 리스크 대비 수익 구조가 가장 유리합니다.',newBuy:'50~100% 진입',hold:'추가 매수 고려'},
@@ -588,6 +578,8 @@ let AUTH={user:null,favs:new Set()};
 let dChart=null,hmChart=null;
 
 const cg=(p,m)=>((p-m)/m)*100;
+/* DB에서 불러온 종목은 gap_pct 필드를 직접 사용 */
+function getGapPct(s){ return s.gap_pct !== undefined ? s.gap_pct : cg(s.p, s.m); }
 function getGrade(g){
   if(g>=0&&g<=15)return GRADES[0];if(g>15&&g<=30)return GRADES[1];if(g>30)return GRADES[2];
   if(g>=-5&&g<0)return GRADES[3];if(g>=-20&&g<-5)return GRADES[4];return GRADES[5];
@@ -762,12 +754,13 @@ async function doToggleFav(t){
 }
 
 /* ── NAVIGATION ── */
-function nav(page,sub){
+async function nav(page,sub){
   S.page=page;
   if(page==='stocks'&&sub)S.mkt=sub;
   if(page==='detail'&&sub)S.detailTicker=sub;
   if(page==='heatmap'&&sub)S.hmSec=sub;
   if(page==='guide')S.guideTab=sub||S.guideTab||'intro';
+  if(page==='stocks'||page==='heatmap'||page==='detail') await loadStocks();
   render();window.scrollTo(0,0);
 }
 function render(){
@@ -829,7 +822,7 @@ function renderStocks(){
 }
 function renderStocksTable(){
   const isKr=S.mkt==='kr';
-  let rows=ALL[S.mkt].map(s=>({...s,gap:cg(s.p,s.m)}));
+  let rows=ALL[S.mkt].map(s=>({...s,gap:getGapPct(s)}));
   if(S.filter!==null)rows=rows.filter(s=>getGrade(s.gap).key===5-S.filter);
   const sk=S.thKey||S.sortKey,sd=S.thKey?S.thDir:S.sortDir;
   rows.sort((a,b)=>{
@@ -838,6 +831,14 @@ function renderStocksTable(){
     if(sk==='ma10')return sd==='desc'?b.m-a.m:a.m-b.m;
     return sd==='asc'?a.n.localeCompare(b.n):b.n.localeCompare(a.n);
   });
+  if(rows.length === 0 && !dataLoaded){
+    document.getElementById('dash-tbody').innerHTML='<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--color-text-secondary);font-size:14px">데이터를 불러오는 중...</td></tr>';
+    return;
+  }
+  if(rows.length === 0){
+    document.getElementById('dash-tbody').innerHTML='<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--color-text-secondary);font-size:14px">표시할 종목이 없습니다</td></tr>';
+    return;
+  }
   document.getElementById('dash-tbody').innerHTML=rows.map(s=>{
     const g=getGrade(s.gap);
     return`<tr class="cl" onclick="openDetail('${s.t}','${S.mkt}')">
@@ -850,7 +851,7 @@ function renderStocksTable(){
       <td style="text-align:center">${favBtnHTML(s.t)}</td>
     </tr>`;
   }).join('');
-}
+  }
 function openDetail(ticker,mkt){S.detailMkt=mkt;nav('detail',ticker);}
 function setFilter(i){S.filter=S.filter===i?null:i;renderStocks();}
 function setSort(k,d){S.sortKey=k;S.sortDir=d;S.thKey=null;renderStocksTable();document.querySelectorAll('[id^="sb-"]').forEach(b=>b.classList.remove('on'));const sb=document.getElementById('sb-'+k+'-'+d);if(sb)sb.classList.add('on');}
@@ -865,7 +866,7 @@ document.getElementById('si').addEventListener('keydown',e=>{if(e.key==='Enter')
 /* ── DETAIL ── */
 function renderDetail(){
   const s=findStock(S.detailTicker);if(!s)return;
-  const isKr=S.detailMkt==='kr';const gap=cg(s.p,s.m);const grade=getGrade(gap);
+  const isKr=S.detailMkt==='kr';const gap=getGapPct(s);const grade=getGrade(gap);
   const mainLabel=isKr?s.n:s.t;const subLabel=isKr?s.t:s.n;
   document.getElementById('d-ticker').textContent=mainLabel;
   document.getElementById('d-sub').innerHTML=`<span style="font-size:11px;color:var(--color-text-tertiary)">${subLabel}</span><span style="color:var(--color-text-tertiary)">·</span><span>${s.sec} · ${s.mcs}</span><span class="sl" onclick="S.hmMkt='${S.detailMkt}';nav('heatmap','${s.sec}')">섹터 히트맵 →</span>`;
@@ -975,7 +976,7 @@ function renderMyPage(){
 
 /* ── HEATMAP ── */
 function getSectors(mkt){
-  const map={};ALL[mkt].forEach(s=>{if(!map[s.sec])map[s.sec]={name:s.sec,total:0,above:0,gs:0};map[s.sec].total++;const g=cg(s.p,s.m);if(g>=0)map[s.sec].above++;map[s.sec].gs+=g;});
+  const map={};ALL[mkt].forEach(s=>{if(!map[s.sec])map[s.sec]={name:s.sec,total:0,above:0,gs:0};map[s.sec].total++;const g=getGapPct(s);if(g>=0)map[s.sec].above++;map[s.sec].gs+=g;map[s.sec].above+=g>=0?0:0;});
   return Object.values(map).map(s=>({...s,avgGap:parseFloat((s.gs/s.total).toFixed(1))}));
 }
 function renderHeatmap(){
@@ -1015,7 +1016,7 @@ function toggleDrill(name){S.hmSec=S.hmSec===name?null:name;renderHeatmap();if(S
 function renderDrill(){
   const panel=document.getElementById('drill-panel');if(!S.hmSec){panel.innerHTML='';return;}
   const isKr=S.hmMkt==='kr';
-  let stocks=ALL[S.hmMkt].filter(s=>s.sec===S.hmSec).map(s=>({...s,gap:cg(s.p,s.m)}));
+  let stocks=ALL[S.hmMkt].filter(s=>s.sec===S.hmSec).map(s=>({...s,gap:getGapPct(s)}));
   const maxMc=Math.max(...stocks.map(s=>s.mc));
   if(S.drillSort==='gap-desc')stocks.sort((a,b)=>b.gap-a.gap);else if(S.drillSort==='gap-asc')stocks.sort((a,b)=>a.gap-b.gap);else stocks.sort((a,b)=>b.mc-a.mc);
   const ab=stocks.filter(s=>s.gap>=0).length;const avgGap=(stocks.reduce((a,s)=>a+s.gap,0)/stocks.length).toFixed(1);
@@ -1079,8 +1080,27 @@ function updateTimer(){
   document.getElementById('timer').textContent=(hh>0?hh+'시간 ':'')+mm+'분 '+String(ss).padStart(2,'0')+'초';
 }
 
-restoreSession().then(()=>{ render(); });
+restoreSession().then(async () => {
+  await loadStocks();
+  render();
+});
 renderAuthArea();updateTimer();setInterval(updateTimer,1000);
+
+/* 갱신 타이머 — 다음 갱신 시각에 맞춰 자동 리로드 */
+setInterval(async () => {
+  const now = new Date();
+  const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+  const updateTimes = [[4,0],[10,0],[16,0]];
+  for (const [uh, um] of updateTimes) {
+    if (h === uh && m === 0 && s < 30) {
+      console.log('갱신 시각 도달 — 데이터 새로고침');
+      dataLoaded = false;
+      await loadStocks();
+      render();
+      break;
+    }
+  }
+}, 10000);
 </script>
 </body>
 </html>
