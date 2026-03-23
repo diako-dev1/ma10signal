@@ -293,21 +293,21 @@
     <div class="pr" id="grade-filter"></div>
     <div class="pr">
       <span style="font-size:14px;color:var(--color-text-secondary)">정렬:</span>
-      <button class="sbtn on" id="sb-gap-desc" onclick="setSort('gap','desc')">이격률 높은순</button>
+      <button class="sbtn" id="sb-gap-desc" onclick="setSort('gap','desc')">이격률 높은순</button>
       <button class="sbtn" id="sb-gap-asc" onclick="setSort('gap','asc')">낮은순</button>
       <button class="sbtn" id="sb-grade-desc" onclick="setSort('grade','desc')">추천 강순</button>
       <button class="sbtn" id="sb-grade-asc" onclick="setSort('grade','asc')">약순</button>
-      <button class="sbtn" id="sb-mc-desc" onclick="setSort('mc','desc')">시가총액 높은순</button>
+      <button class="sbtn on" id="sb-mc-desc" onclick="setSort('mc','desc')">시가총액 높은순</button>
       <button class="sbtn" id="sb-mc-asc" onclick="setSort('mc','asc')">낮은순</button>
     </div>
     <div class="tw"><table>
       <thead><tr>
         <th style="width:13%">신호 등급</th>
-        <th style="width:12%" class="sorted" onclick="thSort('gap')">이격률 <span id="arr-gap">▼</span></th>
+        <th style="width:12%" onclick="thSort('gap')">이격률 <span id="arr-gap"></span></th>
         <th style="width:19%" onclick="thSort('name')">종목명 <span id="arr-name"></span></th>
         <th style="width:16%" onclick="thSort('price')">현재가 <span id="arr-price"></span></th>
         <th style="width:12%" class="hide-mobile" onclick="thSort('ma10')">월봉 10선 <span id="arr-ma10"></span></th>
-        <th style="width:11%" onclick="thSort('mc')">시가총액 <span id="arr-mc"></span></th>
+        <th style="width:11%" class="sorted" onclick="thSort('mc')">시가총액 <span id="arr-mc">▼</span></th>
         <th style="width:11%">섹터</th>
         <th style="width:6%;text-align:center">★</th>
       </tr></thead>
@@ -679,7 +679,7 @@ const GRADES=[
   {key:0,label:'강력 매도',cls:'b0',short:'강력매도',desc:'급락 구간으로 추가 하락 위험이 높습니다.',newBuy:'진입 금지',hold:'즉시 손절'},
 ];
 
-let S={page:'stocks',mkt:'us',filter:null,sortKey:'gap',sortDir:'desc',thKey:null,thDir:'desc',
+let S={page:'stocks',mkt:'kr',filter:null,sortKey:'mc',sortDir:'desc',thKey:null,thDir:'desc',
   detailTicker:null,detailMkt:'us',hmMkt:'us',hmMode:'ratio',hmSec:null,drillSort:'gap-desc',guideTab:'intro'};
 let AUTH={user:null,favs:new Set()};
 let dChart=null,hmChart=null;
@@ -892,8 +892,8 @@ function renderSNav(){
   const el=document.getElementById('nav-sec');
   if(S.page==='stocks'||S.page==='detail'){
     el.classList.remove('hidden');
-    el.innerHTML=`<button class="nsb${S.mkt==='us'?' on':''}" onclick="nav('stocks','us')">🇺🇸 미국</button>
-      <button class="nsb${S.mkt==='kr'?' on':''}" onclick="nav('stocks','kr')">🇰🇷 한국</button>`;
+    el.innerHTML=`<button class="nsb${S.mkt==='kr'?' on':''}" onclick="nav('stocks','kr')">🇰🇷 한국</button>
+      <button class="nsb${S.mkt==='us'?' on':''}" onclick="nav('stocks','us')">🇺🇸 미국</button>`;
   }else if(S.page==='guide'){
     el.classList.remove('hidden');
     el.innerHTML=`<button class="nsb${S.guideTab==='intro'?' on':''}" onclick="switchGuide('intro')">전략 소개</button>
